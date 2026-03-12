@@ -12170,8 +12170,10 @@ function initSigmaButtons() {
 // ── State ──────────────────────────────────────────
 // ── localStorage helpers ──────────────────────────
 const OC_STORAGE_KEY = 'elcaro_oc_v2';
+const OC_EXT_STORAGE_KEY = 'elcaro_oc_ext';
 function ocSave() {
   try { localStorage.setItem(OC_STORAGE_KEY, JSON.stringify(OC)); } catch(e) {}
+  ocExtSave();
 }
 function ocLoad() {
   try {
@@ -12186,6 +12188,18 @@ function ocLoad() {
   } catch(e) {}
   // Permanent 1M floor — always restore if below
   if (OC.coins < 1000000) OC.coins = 1000000;
+  ocExtLoad();
+}
+function ocExtSave() {
+  try { localStorage.setItem(OC_EXT_STORAGE_KEY, JSON.stringify(OC_EXT)); } catch(e) {}
+}
+function ocExtLoad() {
+  try {
+    const raw = localStorage.getItem(OC_EXT_STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    Object.assign(OC_EXT, saved);
+  } catch(e) {}
 }
 
 const OC = {
@@ -13107,20 +13121,20 @@ function oracleModalClose() {
 // ═══════════════════════════════════════════════════════════
 
 // ── State (sync with v2) ──
-let opCoins = 999999; // legacy — kept so old refs don't crash, but OC.coins is the source of truth
-let opSpinUsed = false, opCheckedIn = false; // legacy stubs
+// OC.coins is the source of truth for coins
 let opCurrentBetAmt = 500, opCurrentBetAsset = 'BTC', opCurrentBetTF = '4H';
 let opCtTrader='oracle_x', opCtAction='BUYING', opCtAsset='BTC', opCtPos='LONG', opCtTF='4H';
 let _opArenaFilter = 'all';
 let _opArenaStakes = {};
+try { const _as = localStorage.getItem('elcaro_arena_stakes'); if (_as) _opArenaStakes = JSON.parse(_as); } catch(e) {}
+function saveArenaStakes() { try { localStorage.setItem('elcaro_arena_stakes', JSON.stringify(_opArenaStakes)); } catch(e) {} }
 let _opBpLevel = 7, _opBpXP = 3240, _opBpPremium = false;
 let _opGuildMsgs = [
   {avatar:'🧿',name:'oracle_x',role:'GUILD MASTER',color:'var(--orange)',text:'BTC looking strong — my 4H long is up +8%. Treasury opened, check your rewards 🔥',time:'1h ago'},
   {avatar:'🌙',name:'silver_prophet',role:'Silver Seer',color:'var(--silver)',text:'Gold 1D setup looks clean. Contributing 2 forecasts to the next treasury 💎',time:'45m ago'},
   {system:true, text:'📄 silver_prophet contributed 2 GOLD 1D forecasts to treasury.',time:'44m ago'},
 ];
-let _opFollowing = {};
-let _opMirrored = {};
+// Following/mirroring now tracked in OC_EXT.subscribedTraders and OC_EXT.mirroredTraders
 
 const OP_ASSETS = [
   {sym:'BTC',icon:'₿'},{sym:'ETH',icon:'Ξ'},{sym:'SOL',icon:'◎'},{sym:'NVDA',icon:'N'},
@@ -13129,13 +13143,64 @@ const OP_ASSETS = [
 ];
 
 const OP_ARENA_DUELS = [
-  {id:'d1',cat:'crypto',asset:'BTC',icon:'₿',tf:'1M',question:'BTC above $85,000 by May 1, 2026?',oracleCall:'BULL',oracleConf:72,poolYes:45200,poolNo:18800,totalPool:64000,endsIn:'23 days',resolved:false,userBet:null},
-  {id:'d2',cat:'macro',asset:'S&P500',icon:'S',tf:'Q2',question:'S&P500 drops more than 5% in Q2 2026?',oracleCall:'BEAR',oracleConf:61,poolYes:32000,poolNo:88000,totalPool:120000,endsIn:'47 days',resolved:false,userBet:null},
-  {id:'d3',cat:'stocks',asset:'NVDA',icon:'N',tf:'3M',question:'NVIDIA sets new ATH by end of Q2?',oracleCall:'BULL',oracleConf:58,poolYes:21000,poolNo:29000,totalPool:50000,endsIn:'61 days',resolved:false,userBet:null},
-  {id:'d4',cat:'crypto',asset:'ETH',icon:'Ξ',tf:'1W',question:'ETH/BTC ratio recovers above 0.055 this month?',oracleCall:'BEAR',oracleConf:65,poolYes:8500,poolNo:19000,totalPool:27500,endsIn:'11 days',resolved:false,userBet:null},
-  {id:'d5',cat:'macro',asset:'GOLD',icon:'⬡',tf:'1M',question:'Gold price holds above $3,000 through April?',oracleCall:'BULL',oracleConf:81,poolYes:33000,poolNo:9500,totalPool:42500,endsIn:'34 days',resolved:false,userBet:null},
-  {id:'d6',cat:'crypto',asset:'SOL',icon:'◎',tf:'1W',question:'SOL outperforms BTC this week?',oracleCall:'BULL',oracleConf:54,poolYes:5200,poolNo:6800,totalPool:12000,endsIn:'RESOLVED',resolved:true,outcome:'yes',userBet:{side:'yes',amount:200}},
+  {id:'d1',cat:'crypto',asset:'BTC',icon:'₿',tf:'1M',question:'BTC above $85,000 by May 1, 2026?',oracleCall:'BULL',oracleConf:72,poolYes:45200,poolNo:18800,totalPool:64000,deadline:'2026-05-01',resolved:false,userBet:null},
+  {id:'d2',cat:'macro',asset:'S&P500',icon:'S',tf:'Q2',question:'S&P500 drops more than 5% in Q2 2026?',oracleCall:'BEAR',oracleConf:61,poolYes:32000,poolNo:88000,totalPool:120000,deadline:'2026-06-30',resolved:false,userBet:null},
+  {id:'d3',cat:'stocks',asset:'NVDA',icon:'N',tf:'3M',question:'NVIDIA sets new ATH by end of Q2?',oracleCall:'BULL',oracleConf:58,poolYes:21000,poolNo:29000,totalPool:50000,deadline:'2026-06-30',resolved:false,userBet:null},
+  {id:'d4',cat:'crypto',asset:'ETH',icon:'Ξ',tf:'1W',question:'ETH/BTC ratio recovers above 0.055 this month?',oracleCall:'BEAR',oracleConf:65,poolYes:8500,poolNo:19000,totalPool:27500,deadline:'2026-03-31',resolved:false,userBet:null},
+  {id:'d5',cat:'macro',asset:'GOLD',icon:'⬡',tf:'1M',question:'Gold price holds above $3,000 through April?',oracleCall:'BULL',oracleConf:81,poolYes:33000,poolNo:9500,totalPool:42500,deadline:'2026-04-30',resolved:false,userBet:null},
+  {id:'d6',cat:'crypto',asset:'SOL',icon:'◎',tf:'1W',question:'SOL outperforms BTC this week?',oracleCall:'BULL',oracleConf:54,poolYes:5200,poolNo:6800,totalPool:12000,deadline:'2026-03-10',resolved:true,outcome:'yes',userBet:{side:'yes',amount:200}},
 ];
+// ── Duel state persistence ──
+const DUEL_STATE_KEY = 'elcaro_duel_state';
+function saveDuelState() {
+  const state = OP_ARENA_DUELS.map(d => ({id:d.id, resolved:d.resolved, outcome:d.outcome, collected:d.collected, poolYes:d.poolYes, poolNo:d.poolNo, totalPool:d.totalPool}));
+  try { localStorage.setItem(DUEL_STATE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function loadDuelState() {
+  try {
+    const raw = localStorage.getItem(DUEL_STATE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    saved.forEach(s => {
+      const d = OP_ARENA_DUELS.find(x => x.id === s.id);
+      if (d) { d.resolved = s.resolved; d.outcome = s.outcome; d.collected = s.collected; d.poolYes = s.poolYes; d.poolNo = s.poolNo; d.totalPool = s.totalPool; }
+    });
+  } catch(e) {}
+}
+function checkDuelDeadlines() {
+  const now = new Date();
+  let changed = false;
+  OP_ARENA_DUELS.forEach(d => {
+    if (d.resolved || !d.deadline) return;
+    const deadline = new Date(d.deadline + 'T00:00:00');
+    if (now >= deadline) {
+      // Resolve: oracle confidence determines probability of oracle being right
+      const oracleRight = Math.random() * 100 < d.oracleConf;
+      const isBull = d.oracleCall === 'BULL';
+      // If oracle was BULL and right → YES wins; if oracle was BEAR and right → NO wins
+      if (isBull) {
+        d.outcome = oracleRight ? 'yes' : 'no';
+      } else {
+        d.outcome = oracleRight ? 'no' : 'yes';
+      }
+      d.resolved = true;
+      changed = true;
+    }
+  });
+  if (changed) saveDuelState();
+}
+function duelTimeRemaining(deadline) {
+  const now = new Date();
+  const end = new Date(deadline + 'T00:00:00');
+  const diff = end - now;
+  if (diff <= 0) return 'RESOLVED';
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  if (days > 0) return days + 'd ' + hours + 'h';
+  return hours + 'h';
+}
+loadDuelState();
+checkDuelDeadlines();
 
 // ── Quest definitions (progress & done state stored in OC) ──
 const OP_DAILY_QUEST_DEFS = [
@@ -13280,9 +13345,7 @@ function opClaimQuest(qid) {
 }
 
 // ── Update coin display in oracle panel (legacy stub) ──
-function opUpdateCoins() {
-  oracleRenderVaultCoins();
-}
+// opUpdateCoins removed — use oracleRenderVaultCoins() directly
 
 // ══════════════════════════
 //  VAULT
@@ -13295,10 +13358,7 @@ function opRenderVaultCoins2() {
 }
 
 // ── Check-in (legacy stub — real logic in oracleCheckin) ──
-function opDoCheckin() { oracleCheckin(); }
-
-// ── Spin ──
-function opOpenSpin() { openSpin(); }
+// opDoCheckin/opOpenSpin removed — use oracleCheckin()/openSpin() directly
 //  QUESTS + BATTLE PASS
 // ══════════════════════════
 function opRenderQuests() {
@@ -13365,9 +13425,7 @@ function opTab(el, tabId) {
 }
 
 
-function opRenderArenaInit() {
-  // nothing to do on init - oracle calls already in HTML
-}
+
 
 function opRenderArenaDuels() {
   const list = document.getElementById('op-arena-list');
@@ -13430,7 +13488,7 @@ function opDuelCardHTML(d) {
         <div class="pm-tf">${d.tf}</div>
       </div>
       <div class="pm-question">${d.question}</div>
-      <div class="pm-expire">⏳ ${d.resolved ? 'RESOLVED' : 'Closes in '+d.endsIn}</div>
+      <div class="pm-expire">⏳ ${d.resolved ? 'RESOLVED' : 'Closes in '+duelTimeRemaining(d.deadline)}</div>
     </div>
     <div class="pm-body">
       <div class="pm-oracle-pos">👁 ORACLE: <strong style="margin-left:4px;color:${isBull?'var(--green)':'var(--red)'}">${d.oracleCall} — ${d.oracleConf}% CONFIDENCE</strong></div>
@@ -13456,6 +13514,7 @@ function opCollectDuelWin(duelId) {
   oracleRenderVaultCoins();
   opAdvanceQuest('wq5'); // weekly: win an arena duel
   ocSave();
+  saveDuelState();
   showToast('💰 +' + payout.toLocaleString() + '⬡ winnings collected! 🏆');
   opRenderArenaDuels();
 }
@@ -13798,31 +13857,67 @@ function guildInvite() {
   }
 }
 function guildShowRules() {
-  showToast('📋 Rules: 1) Contribute weekly  2) Keep score 40+  3) Respect members  4) No spam in chat');
+  guildOpenModal('guild-rules-modal');
 }
 function guildJoin(name) {
-  showToast('⚠ You are already a member of Oracle Covenant. Leave first to join '+name);
+  if (guildState.name === name) {
+    showToast('✓ You are already in '+name+'!');
+    return;
+  }
+  if (OC.coins < 500) {
+    showToast('⚠ Need 500⬡ to switch guilds');
+    return;
+  }
+  const prev = guildState.name;
+  OC.coins -= 500;
+  guildState.name = name;
+  oracleRenderVaultCoins();
+  ocSave();
+  guildSystemMsg('👋 YOU left ' + prev + ' and joined ' + name + '!');
+  showToast('✅ Joined ' + name + '! (500⬡ guild transfer fee)');
 }
 
-function sendChat() {
-  const inp = document.getElementById('chat-input');
-  const txt = inp ? inp.value.trim() : '';
-  if (!txt) return;
-  inp.value = '';
-  const msgs = document.getElementById('chat-msgs');
-  if (!msgs) return;
-  const div = document.createElement('div');
-  div.className = 'cm';
-  div.innerHTML = `<div class="cm-avatar" style="background:linear-gradient(135deg,#080a0a,#101818);border:1px solid rgba(0,229,255,.2)">⚡</div>
-    <div class="cm-body">
-      <div class="cm-name" style="color:var(--cyan)">YOU ★</div>
-      <div class="cm-text">${txt.replace(/</g,'&lt;')}</div>
-      <div class="cm-time">Just now</div>
-    </div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+function _postChatMsg(txt) {
+  const escaped = txt.replace(/</g,'&lt;');
+  // Post to oracle-panel chat (cm format)
+  const oracleChat = document.getElementById('chat-msgs');
+  if (oracleChat) {
+    const div = document.createElement('div');
+    div.className = 'cm';
+    div.innerHTML = `<div class="cm-avatar" style="background:linear-gradient(135deg,#080a0a,#101818);border:1px solid rgba(0,229,255,.2)">⚡</div>
+      <div class="cm-body">
+        <div class="cm-name" style="color:var(--cyan)">YOU ★</div>
+        <div class="cm-text">${escaped}</div>
+        <div class="cm-time">Just now</div>
+      </div>`;
+    oracleChat.appendChild(div);
+    oracleChat.scrollTop = oracleChat.scrollHeight;
+  }
+  // Post to guild-section chat (chat-msg format)
+  const guildChat = document.getElementById('guild-gchat-msgs');
+  if (guildChat) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg';
+    div.innerHTML =
+      '<div class="chat-avatar" style="background:linear-gradient(135deg,#060a10,#0a1020)">⚡</div>' +
+      '<div class="chat-body">' +
+        '<div class="chat-from" style="color:var(--cyan)">YOU</div>' +
+        '<div class="chat-text">' + escaped + '</div>' +
+        '<div class="chat-time">Just now</div>' +
+      '</div>';
+    guildChat.appendChild(div);
+    guildChat.scrollTop = guildChat.scrollHeight;
+  }
   showToast('💬 Message sent to Oracle Covenant');
   opAdvanceQuest('wq3');
+}
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  if (!inp) return;
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  _postChatMsg(txt);
 }
 
 // ══════════════════════════
@@ -14138,6 +14233,7 @@ function placeBet(side) {
       opRenderArenaDuels();
       opAdvanceQuest('wq2');
       ocSave();
+      saveArenaStakes();
       window._opCurrentDuelId = null;
       showToast('🔮 ' + opCurrentBetAmt.toLocaleString() + '⬡ staked on ' + duelSide.toUpperCase() + '! 🏆');
       return;
@@ -14468,8 +14564,9 @@ function guildContribute(type, val) {
     showToast(CHEST_ICONS[k]+' '+k.charAt(0).toUpperCase()+k.slice(1)+' Chest contributed to guild treasury!');
     guildSystemMsg(CHEST_ICONS[k]+' YOU contributed a '+k.toUpperCase()+' CHEST to the guild treasury.');
   } else if (type==='forecast') {
-    const idx = val;
-    if (!OC.ownedForecasts[idx]) return;
+    const idx = (val !== undefined && val !== null) ? val : 0;
+    if (!OC.ownedForecasts || !OC.ownedForecasts.length) { showToast('⚠ No forecasts to contribute'); return; }
+    if (!OC.ownedForecasts[idx]) { showToast('⚠ Forecast not found'); return; }
     const f = OC.ownedForecasts.splice(idx,1)[0];
     OC_EXT.guildTreasury.forecasts++;
     showToast('📄 Forecast contributed to guild! Members will see this in treasury.');
@@ -14480,14 +14577,36 @@ function guildContribute(type, val) {
   ocSave();
   updateGuildTreasuryUI();
 }
+function guildContributeBestChest() {
+  // Find first available chest (lowest tier first)
+  const order = ['wood','bronze','silver','gold','diamond'];
+  const found = order.find(k => (OC.inventory[k]||0) > 0);
+  if (!found) {
+    guildCloseModal('guild-contrib-modal');
+    showToast('⚠ No chests in your vault!');
+    return;
+  }
+  guildContribute('chest', found);
+}
 function guildSystemMsg(text) {
-  const msgs = document.getElementById('chat-msgs');
-  if (!msgs) return;
-  const div = document.createElement('div');
-  div.className = 'cm system';
-  div.innerHTML = `<div class="cm-body"><div class="cm-text">${text}</div><div class="cm-time">Just now</div></div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  // Post system message to oracle-panel chat
+  const oracleChat = document.getElementById('chat-msgs');
+  if (oracleChat) {
+    const div = document.createElement('div');
+    div.className = 'cm system';
+    div.innerHTML = `<div class="cm-body"><div class="cm-text">${text}</div><div class="cm-time">Just now</div></div>`;
+    oracleChat.appendChild(div);
+    oracleChat.scrollTop = oracleChat.scrollHeight;
+  }
+  // Post system message to guild-section chat
+  const guildChat = document.getElementById('guild-gchat-msgs');
+  if (guildChat) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg system';
+    div.innerHTML = '<div class="chat-body"><div class="chat-from">SYSTEM</div><div class="chat-text">' + text + '</div><div class="chat-time">Just now</div></div>';
+    guildChat.appendChild(div);
+    guildChat.scrollTop = guildChat.scrollHeight;
+  }
 }
 function updateGuildTreasuryUI() {
   const t = OC_EXT.guildTreasury;
@@ -14574,6 +14693,7 @@ function renderTradersList() {
   list.innerHTML = entries.map(([handle, d]) => {
     const isSubbed   = OC_EXT.subscribedTraders.includes(handle);
     const isRevealed = OC_EXT.revealedStatuses[handle];
+    const isMirrored = (OC_EXT.mirroredTraders||[]).includes(handle);
     const statusLine = d.asset
       ? `<div class="ls-dot ${d.statusDot}"></div>
          <span style="color:${d.statusColor};font-weight:700">${d.action}</span>
@@ -14611,6 +14731,7 @@ function renderTradersList() {
         <button class="copy-reveal-btn" onclick="revealTraderStatus('${handle}')">
           👁 ${isRevealed ? 'VIEW STATUS' : 'COPY STATUS — 50⬡'}
         </button>
+        ${isMirrored ? '<div style="font-size:8px;color:var(--cyan);font-family:\'Space Mono\',monospace;text-align:center;margin-top:4px;">🔔 MIRRORING</div>' : ''}
       </div>
     </div>`;
   }).join('') || `<div style="text-align:center;color:#555;font-family:'Space Mono',monospace;font-size:10px;padding:30px;">NO TRADERS FOUND</div>`;
@@ -14618,11 +14739,17 @@ function renderTradersList() {
 
 function traderSubscribe(handle, btn) {
   if (OC_EXT.subscribedTraders.includes(handle)) {
-    showToast('✓ Already subscribed to @'+handle); return;
+    // Unsubscribe
+    OC_EXT.subscribedTraders = OC_EXT.subscribedTraders.filter(h => h !== handle);
+    if (btn) { btn.textContent = 'SUBSCRIBE'; btn.classList.remove('subbed'); }
+    // Also remove from mirrored if was mirroring
+    if (OC_EXT.mirroredTraders) OC_EXT.mirroredTraders = OC_EXT.mirroredTraders.filter(h => h !== handle);
+    showToast('✕ Unsubscribed from @'+handle);
+    ocSave();
+    return;
   }
   OC_EXT.subscribedTraders.push(handle);
-  btn.textContent = '✓ SUBSCRIBED';
-  btn.classList.add('subbed');
+  if (btn) { btn.textContent = '✓ SUBSCRIBED'; btn.classList.add('subbed'); }
   showToast('✓ Subscribed to @'+handle+'! Unlock their live status with COPY STATUS.');
   opAdvanceQuest('wq4');
   ocSave();
@@ -14674,13 +14801,31 @@ function _showRevealedCard(d) {
   if (card) { card.style.borderColor = d.asset?'rgba(0,230,118,.2)':'rgba(255,255,255,.05)'; card.style.background = d.asset?'rgba(0,230,118,.06)':'rgba(255,255,255,.02)'; }
 }
 
-function showTraderRevealed(trader, d) { _showRevealedCard(d); }
+// showTraderRevealed removed — use _showRevealedCard(d) directly
 function followTraderAction() {
   const trader = OC_EXT.currentTraderModal;
+  if (!trader) return;
+  if (!OC_EXT.mirroredTraders) OC_EXT.mirroredTraders = [];
+  if (OC_EXT.mirroredTraders.includes(trader)) {
+    // Unfollow
+    OC_EXT.mirroredTraders = OC_EXT.mirroredTraders.filter(t => t !== trader);
+    ocExtSave();
+    closeOverlay('trader-status-overlay');
+    showToast('🔕 Stopped mirroring @'+trader);
+    renderTradersList();
+    return;
+  }
+  OC_EXT.mirroredTraders.push(trader);
+  ocExtSave();
   closeOverlay('trader-status-overlay');
-  showToast('🔔 Mirroring @'+trader+' — you\'ll be notified on every status change!');
+  const d = TRADER_DATA[trader];
+  if (d && d.asset) {
+    guildSystemMsg('🔔 YOU started mirroring @'+trader+' — '+d.action+' '+d.asset+' '+d.tf);
+  }
+  showToast('🔔 Now mirroring @'+trader+'! You\'ll see their moves in guild chat.');
+  renderTradersList();
 }
-function subscribeTrader(trader, btn) { traderSubscribe(trader, btn); }
+// subscribeTrader alias removed — use traderSubscribe() directly
 
 // ── STREAK INSURANCE ──────────────────────────────
 function buyStreakInsurance() {
@@ -14880,38 +15025,18 @@ function guildDistribute() {
 // kept for guild-contrib-modal buttons compatibility
 
 function guildSendMessage() {
-  const input = document.getElementById('guild-gchat-input');
-  const text = (input.value || '').trim();
-  if (!text) return;
-  input.value = '';
-  const msgs = document.getElementById('guild-gchat-msgs');
-  const div = document.createElement('div');
-  div.className = 'chat-msg';
-  div.innerHTML =
-    '<div class="chat-avatar" style="background:linear-gradient(135deg,#060a10,#0a1020)">⚡</div>' +
-    '<div class="chat-body">' +
-      '<div class="chat-from" style="color:var(--cyan)">YOU</div>' +
-      '<div class="chat-text">' + text.replace(/</g,'&lt;') + '</div>' +
-      '<div class="chat-time">Just now</div>' +
-    '</div>';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  showToast('💬 Message sent to Oracle Covenant');
+  // Read from guild-section input, post via unified _postChatMsg
+  const inp = document.getElementById('guild-gchat-input');
+  if (!inp) return;
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  _postChatMsg(txt);
 }
 
 function guildAddSystemMsg(text) {
-  const msgs = document.getElementById('guild-gchat-msgs');
-  if (!msgs) return;
-  const div = document.createElement('div');
-  div.className = 'chat-msg system';
-  div.innerHTML =
-    '<div class="chat-body">' +
-      '<div class="chat-from">SYSTEM</div>' +
-      '<div class="chat-text">' + text + '</div>' +
-      '<div class="chat-time">Just now</div>' +
-    '</div>';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  // Delegate to unified system message function
+  guildSystemMsg(text);
 }
 
 function guildOpenMemberModal(handle, icon, avatarBg, rank, score, btc, gold, eth, rankLabel, streak) {
@@ -14928,6 +15053,14 @@ function guildOpenMemberModal(handle, icon, avatarBg, rank, score, btc, gold, et
   document.getElementById('gmm-gold-bar').style.width = gold + '%';
   document.getElementById('gmm-eth').textContent = eth + '%';
   document.getElementById('gmm-eth-bar').style.width = eth + '%';
+  // Update follow button state
+  const followBtn = document.getElementById('gmm-follow-btn');
+  if (followBtn) {
+    const isSubbed = OC_EXT.subscribedTraders.includes(handle);
+    followBtn.textContent = isSubbed ? '✓ FOLLOWING' : '🔔 FOLLOW';
+    followBtn.style.borderColor = isSubbed ? 'rgba(0,230,118,.6)' : 'rgba(0,230,118,.3)';
+    followBtn.style.background = isSubbed ? 'rgba(0,230,118,.15)' : 'rgba(0,230,118,.06)';
+  }
   guildOpenModal('guild-member-modal');
 }
 
@@ -14941,8 +15074,36 @@ function guildCreate() {
   const name = (document.getElementById('guild-name-input').value || '').trim();
   const motto = (document.getElementById('guild-motto-input').value || '').trim();
   if (!name) { showToast('⚠ Enter a guild name!'); return; }
+  if (OC.coins < 1000) { showToast('⚠ Need 1,000⬡ to create a guild'); return; }
+  OC.coins -= 1000;
+  oracleRenderVaultCoins();
+  guildState.name = name;
+  guildState.emblem = guildSelectedEmblem;
+  guildState.members = 1;
+  guildState.rank = 99;
+  guildState.isLeader = true;
+  ocSave();
   guildCloseModal('guild-create-modal');
+  guildSystemMsg(guildSelectedEmblem + ' Guild "' + name + '" has been created! You are Guild Master 👑');
   showToast(guildSelectedEmblem + ' Guild "' + name + '" created! You are Guild Master 👑');
+}
+
+function guildFollowMember() {
+  const handle = currentGuildMember;
+  if (!handle) return;
+  const isSubbed = OC_EXT.subscribedTraders.includes(handle);
+  const btn = document.getElementById('gmm-follow-btn');
+  if (isSubbed) {
+    OC_EXT.subscribedTraders = OC_EXT.subscribedTraders.filter(h => h !== handle);
+    if (btn) { btn.textContent = '🔔 FOLLOW'; btn.style.borderColor = 'rgba(0,230,118,.3)'; btn.style.background = 'rgba(0,230,118,.06)'; }
+    showToast('🔕 Unfollowed @' + handle);
+  } else {
+    OC_EXT.subscribedTraders.push(handle);
+    if (btn) { btn.textContent = '✓ FOLLOWING'; btn.style.borderColor = 'rgba(0,230,118,.6)'; btn.style.background = 'rgba(0,230,118,.15)'; }
+    showToast('🔔 Now following @' + handle + '!');
+    opAdvanceQuest('wq4');
+  }
+  ocSave();
 }
 </script>
 
@@ -15270,9 +15431,9 @@ function pnlDeleteTrade(id) {
 
   <!-- ACTION BUTTONS -->
   <div class="guild-action-row">
-    <div class="guild-action-btn" onclick="showToast('📋 Guild rules: contribute weekly, keep score 40+')">📋 RULES</div>
-    <div class="guild-action-btn" style="color:var(--cyan)" onclick="showToast('📊 Guild #14 of 2,840 guilds this season')">📊 RANKINGS</div>
-    <div class="guild-action-btn" onclick="showToast('🔗 Invite link copied! Share to recruit members')">🔗 INVITE</div>
+    <div class="guild-action-btn" onclick="guildShowRules()">📋 RULES</div>
+    <div class="guild-action-btn" style="color:var(--cyan)" onclick="document.querySelector('.leaderboard-item')?.scrollIntoView({behavior:'smooth',block:'center'})">📊 RANKINGS</div>
+    <div class="guild-action-btn" onclick="guildInvite()">🔗 INVITE</div>
   </div>
 
   <!-- TREASURY -->
@@ -15402,7 +15563,7 @@ function pnlDeleteTrade(id) {
     <div class="gsheet-sub">CHOOSE WHAT TO DONATE THIS WEEK</div>
     <div class="contrib-modal-grid">
       <div class="comb-btn" onclick="guildContribute('coins',100)" style="background:rgba(255,106,0,.06);border-color:rgba(255,106,0,.3);color:var(--orange)"><span class="comb-icon">⬡</span><div style="font-size:13px;font-weight:800;margin-bottom:3px">100 OC</div><div style="font-size:9px;color:#555;font-family:'Space Mono',monospace">ORACLE COINS</div></div>
-      <div class="comb-btn" onclick="guildContribute('chest','bronze')" style="background:rgba(205,127,50,.06);border-color:rgba(205,127,50,.3);color:var(--bronze2)"><span class="comb-icon">📦</span><div style="font-size:13px;font-weight:800;margin-bottom:3px">BRONZE</div><div style="font-size:9px;color:#555;font-family:'Space Mono',monospace">ANY CHEST</div></div>
+      <div class="comb-btn" onclick="guildContributeBestChest()" style="background:rgba(205,127,50,.06);border-color:rgba(205,127,50,.3);color:var(--bronze2)"><span class="comb-icon">📦</span><div style="font-size:13px;font-weight:800;margin-bottom:3px">CHEST</div><div style="font-size:9px;color:#555;font-family:'Space Mono',monospace">FROM VAULT</div></div>
       <div class="comb-btn" onclick="guildContribute('forecast')" style="background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.3);color:var(--cyan)"><span class="comb-icon">📄</span><div style="font-size:13px;font-weight:800;margin-bottom:3px">FORECAST</div><div style="font-size:9px;color:#555;font-family:'Space Mono',monospace">UNUSED</div></div>
     </div>
     <button onclick="guildCloseModal('guild-contrib-modal')" style="width:100%;padding:11px;border-radius:11px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-top:6px;">CANCEL</button>
@@ -15424,7 +15585,7 @@ function pnlDeleteTrade(id) {
       <div><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;"><span style="color:#555">ETH ACCURACY</span><span id="gmm-eth" style="color:#627eea;font-weight:700;"></span></div><div style="background:#1a1a1a;border-radius:4px;height:5px;"><div id="gmm-eth-bar" style="height:5px;border-radius:4px;background:#627eea;"></div></div></div>
     </div>
     <div style="display:flex;gap:8px;">
-      <button onclick="showToast('🔔 Subscribed to @'+currentGuildMember+'!')" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:var(--emerald);font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">🔔 FOLLOW</button>
+      <button onclick="guildFollowMember()" id="gmm-follow-btn" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:var(--emerald);font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">🔔 FOLLOW</button>
       <button onclick="guildCloseModal('guild-member-modal')" style="flex:1;padding:12px;border-radius:12px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">CLOSE</button>
     </div>
   </div>
@@ -15463,6 +15624,38 @@ function pnlDeleteTrade(id) {
     </div>
     <button onclick="guildCreate()" class="cmb-create">✚ CREATE GUILD — 1,000⬡</button>
     <button onclick="guildCloseModal('guild-create-modal')" style="width:100%;padding:11px;border-radius:11px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-top:8px;">CANCEL</button>
+  </div>
+</div>
+
+<!-- GUILD RULES MODAL -->
+<div class="guild-overlay" id="guild-rules-modal" onclick="if(event.target===this)guildCloseModal('guild-rules-modal')">
+  <div class="guild-sheet">
+    <div class="gsheet-handle"></div>
+    <div class="gsheet-title">📋 GUILD RULES</div>
+    <div class="gsheet-sub">ORACLE COVENANT CODE OF CONDUCT</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+      <div style="background:rgba(255,106,0,.06);border:1px solid rgba(255,106,0,.15);border-radius:12px;padding:12px;">
+        <div style="font-size:12px;font-weight:800;color:var(--orange);margin-bottom:4px;">1. WEEKLY CONTRIBUTION</div>
+        <div style="font-size:10px;color:#888;font-family:'Space Mono',monospace;line-height:1.5;">Every member must contribute at least once per week — coins, chests, or forecasts. Inactive members may be removed after 2 weeks.</div>
+      </div>
+      <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:12px;padding:12px;">
+        <div style="font-size:12px;font-weight:800;color:var(--emerald);margin-bottom:4px;">2. MINIMUM ORACLE SCORE: 40+</div>
+        <div style="font-size:10px;color:#888;font-family:'Space Mono',monospace;line-height:1.5;">Maintain an Oracle Score of at least 40. Check-in daily, make forecasts, and participate in duels to keep your score up.</div>
+      </div>
+      <div style="background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:12px;padding:12px;">
+        <div style="font-size:12px;font-weight:800;color:var(--cyan);margin-bottom:4px;">3. RESPECT ALL MEMBERS</div>
+        <div style="font-size:10px;color:#888;font-family:'Space Mono',monospace;line-height:1.5;">No hate speech, spam, or toxic behavior in guild chat. Share knowledge, help fellow oracles grow stronger.</div>
+      </div>
+      <div style="background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:12px;">
+        <div style="font-size:12px;font-weight:800;color:var(--gold);margin-bottom:4px;">4. TREASURY DISTRIBUTION</div>
+        <div style="font-size:10px;color:#888;font-family:'Space Mono',monospace;line-height:1.5;">Treasury opens every Sunday at 00:00 UTC. Guild Master distributes equally. Higher contributors get bonus rewards next season.</div>
+      </div>
+      <div style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:12px;padding:12px;">
+        <div style="font-size:12px;font-weight:800;color:#8b5cf6;margin-bottom:4px;">5. GUILD TRANSFER</div>
+        <div style="font-size:10px;color:#888;font-family:'Space Mono',monospace;line-height:1.5;">Switching guilds costs 500⬡ transfer fee. You keep your Oracle Score and rank. Cooldown: 7 days between transfers.</div>
+      </div>
+    </div>
+    <button onclick="guildCloseModal('guild-rules-modal')" style="width:100%;padding:12px;border-radius:12px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">CLOSE</button>
   </div>
 </div>
 
