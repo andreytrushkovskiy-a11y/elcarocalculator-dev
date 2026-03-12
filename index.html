@@ -4504,6 +4504,20 @@ input[type=range]::-webkit-slider-thumb {
       <div class="tlb-sub">Rate Calc</div>
     </div>
 
+    <!-- EXCHANGE -->
+    <div onclick="setMode('exchange')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(0,200,255,.07),rgba(0,200,255,.03));border:1px solid rgba(0,200,255,.2);">
+      <div class="tlb-icon" style="font-size:28px;">🏦</div>
+      <div class="tlb-name" style="color:#00c8ff;">EXCHANGE</div>
+      <div class="tlb-sub">BloFin Trading</div>
+    </div>
+
+    <!-- PNL TRACKER -->
+    <div onclick="setMode('pnl')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(34,197,94,.03));border:1px solid rgba(34,197,94,.2);">
+      <div class="tlb-icon" style="font-size:28px;">💲</div>
+      <div class="tlb-name" style="color:#22c55e;">PNL</div>
+      <div class="tlb-sub">Trade Tracker</div>
+    </div>
+
     <!-- F&G -->
     <div onclick="setMode('fgi')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(255,61,87,.07),rgba(255,61,87,.03));border:1px solid rgba(255,61,87,.2);">
       <div class="tlb-icon" style="font-size:28px;">😱</div>
@@ -4537,19 +4551,6 @@ input[type=range]::-webkit-slider-thumb {
       <div class="tlb-icon" style="font-size:28px;">🔑</div>
       <div class="tlb-name" style="color:var(--diamond);">API</div>
       <div class="tlb-sub">Anthropic Key</div>
-    </div>
-
-    <!-- PNL TRACKER -->
-    <div onclick="setMode('pnl')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(34,197,94,.03));border:1px solid rgba(34,197,94,.2);">
-      <div class="tlb-icon" style="font-size:28px;">💲</div>
-      <div class="tlb-name" style="color:#22c55e;">PNL</div>
-      <div class="tlb-sub">Trade Tracker</div>
-    </div>
-
-    <div onclick="setMode('exchange')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(0,200,255,.07),rgba(0,200,255,.03));border:1px solid rgba(0,200,255,.2);">
-      <div class="tlb-icon" style="font-size:28px;">🏦</div>
-      <div class="tlb-name" style="color:#00c8ff;">EXCHANGE</div>
-      <div class="tlb-sub">BloFin Trading</div>
     </div>
 
   </div>
@@ -12541,9 +12542,22 @@ function orcOpenChest() {
   const won=[];
   for(let i=0;i<count;i++) { const f=genForecast(); OC.ownedForecasts.push(f); won.push(f); }
 
-  // Bonus coins
-  const bonus = d.coinValue * 0.1 | 0;
+  // Bonus coins (25% of chest value)
+  const bonus = Math.floor(d.coinValue * 0.25);
   OC.coins += bonus;
+
+  // Gold/Diamond chests also give Oracle Cards
+  let extraRewards = '';
+  if (type === 'gold' || type === 'diamond') {
+    if (!OC_EXT.oracleCards) OC_EXT.oracleCards = 0;
+    OC_EXT.oracleCards++;
+    extraRewards += '<div style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;"><div style="font-size:20px;">🃏</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;color:#ffd700">ORACLE CARD</div><div style="font-size:9px;color:#f5a623;font-family:\'Space Mono\',monospace;">Rare collectible · Use in Arena</div></div></div>';
+  }
+  if (type === 'diamond') {
+    if (!OC_EXT.passAccess) OC_EXT.passAccess = [];
+    OC_EXT.passAccess.push({ type: 'chest', date: new Date().toISOString().slice(0,10) });
+    extraRewards += '<div style="background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;"><div style="font-size:20px;">🔑</div><div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--cyan)">PASS ACCESS</div><div style="font-size:9px;color:#00e5ff88;font-family:\'Space Mono\',monospace;">Premium feature unlocked</div></div></div>';
+  }
 
   document.getElementById('op-cm-actions').style.display='none';
   const res=document.getElementById('op-cm-result');
@@ -12552,15 +12566,19 @@ function orcOpenChest() {
     <div style="text-align:center;font-size:12px;color:#ffd700;font-family:'Space Mono',monospace;margin-bottom:10px;">
       ✨ CHEST OPENED! YOU RECEIVED:
     </div>
+    <div style="background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,106,0,.1));border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:8px;">
+      <div style="font-size:28px;font-weight:900;color:#ffd700;font-family:'Space Mono',monospace;">+${bonus}⬡</div>
+      <div style="font-size:10px;color:#f5a623;margin-top:2px;">ORACLE COINS</div>
+    </div>
     ${won.map(f=>`
       <div style="background:#1a1a1a;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-        <div style="font-size:20px;">${f.asset.icon}</div>
+        <div style="font-size:20px;">${_fcIcon(f)}</div>
         <div style="flex:1;">
-          <div style="font-size:12px;font-weight:700;">${f.asset.name} (${f.asset.sym})</div>
+          <div style="font-size:12px;font-weight:700;">${_fcName(f)}</div>
           <div style="font-size:9px;color:#f5a623;font-family:'Space Mono',monospace;">${f.tf} · ${f.dir} · ${f.mult} · ${f.date}</div>
         </div>
       </div>`).join('')}
-    <div style="text-align:center;font-size:10px;color:#888;margin:8px 0;">+${bonus}⬡ bonus coins</div>
+    ${extraRewards}
     <button onclick="orcChestModalClose()" style="width:100%;background:linear-gradient(135deg,#ff6b00,#f5a623);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;color:#000;cursor:pointer;font-family:'DM Sans',Outfit,sans-serif;">✓ CLAIM REWARDS</button>
     <button onclick="orcChestModalClose();oracleOpenOnTab('profile')" style="width:100%;margin-top:8px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25);border-radius:12px;padding:10px;font-size:12px;font-weight:700;color:#00e5ff;cursor:pointer;font-family:'DM Sans',Outfit,sans-serif;">👁 VIEW IN PROFILE →</button>
   `;
@@ -14323,8 +14341,8 @@ function guildOpenContribForecast() {
   let chips = OC.ownedForecasts.slice(0,8).map((f,i) => {
     const dir = (f.dir||'').includes('BULL') ? '↑' : '↓';
     return '<div class="comb-btn" style="background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.3);color:var(--cyan);cursor:pointer" onclick="guildContribute(\'forecast\','+i+');guildCloseModal(\'guild-contrib-forecast-modal\')">' +
-      '<span style="font-size:18px">'+(f.icon||'📄')+'</span>' +
-      '<div style="font-size:12px;font-weight:800;margin:4px 0">'+(f.sym||f.asset||'?')+' '+dir+'</div>' +
+      '<span style="font-size:18px">'+_fcIcon(f)+'</span>' +
+      '<div style="font-size:12px;font-weight:800;margin:4px 0">'+_fcName(f)+' '+dir+'</div>' +
       '<div style="font-size:9px;color:#555;font-family:\'Space Mono\',monospace">'+(f.tf||'')+' · '+(f.mult||'×1')+'</div></div>';
   }).join('');
   _showGuildPickerModal('guild-contrib-forecast-modal', '📄 CONTRIBUTE FORECAST', OC.ownedForecasts.length+' AVAILABLE', chips);
@@ -15567,6 +15585,19 @@ function generateDNA() {
 }
 
 // ── PROFILE FORECASTS ─────────────────────────────
+// Helper: extract forecast display name (handles both {sym:'BTC'} and {asset:{sym:'BTC'}})
+function _fcName(f) {
+  if (f.sym && typeof f.sym === 'string') return f.sym;
+  if (f.asset && typeof f.asset === 'object') return f.asset.sym || f.asset.name || '?';
+  if (f.asset && typeof f.asset === 'string') return f.asset;
+  return '?';
+}
+function _fcIcon(f) {
+  if (f.icon) return f.icon;
+  if (f.asset && typeof f.asset === 'object' && f.asset.icon) return f.asset.icon;
+  return '📄';
+}
+
 function renderProfileForecasts() {
   var container = document.getElementById('prof-forecasts-list');
   var countEl = document.getElementById('prof-fc-count');
@@ -15578,15 +15609,17 @@ function renderProfileForecasts() {
     return;
   }
   container.innerHTML = fc.map(function(f, i) {
+    var name = _fcName(f);
+    var icon = _fcIcon(f);
     var dir = (f.dir||'').includes('BULL') ? '↑ BULL' : '↓ BEAR';
     var dirColor = (f.dir||'').includes('BULL') ? 'var(--green)' : 'var(--loss,#ef4444)';
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid #1a1a1a;border-radius:12px;padding:10px 12px;">' +
-      '<span style="font-size:20px">'+(f.icon||'📄')+'</span>' +
-      '<div style="flex:1"><div style="font-size:11px;font-weight:700;color:#fff">'+(f.sym||f.asset||'?')+' · '+(f.tf||'?')+' · <span style="color:'+dirColor+'">'+dir+'</span></div>' +
+      '<span style="font-size:20px">'+icon+'</span>' +
+      '<div style="flex:1"><div style="font-size:11px;font-weight:700;color:#fff">'+name+' · '+(f.tf||'?')+' · <span style="color:'+dirColor+'">'+dir+'</span></div>' +
       '<div style="font-size:9px;color:#555;font-family:\'Space Mono\',monospace;margin-top:2px">'+(f.mult||'×1')+' · '+(f.date||'')+(f.source?' · '+f.source:'')+'</div></div>' +
       '<div style="display:flex;gap:4px;">' +
         '<button onclick="profForecastTrade('+i+')" style="padding:5px 10px;border-radius:8px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:var(--green);font-size:9px;font-weight:700;cursor:pointer;font-family:\'Space Mono\',monospace;">TRADE</button>' +
-        '<button onclick="profForecastPass('+i+')" style="padding:5px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.06);color:var(--loss,#ef4444);font-size:9px;font-weight:700;cursor:pointer;font-family:\'Space Mono\',monospace;">PASS</button>' +
+        '<button onclick="profForecastPass('+i+')" style="padding:5px 10px;border-radius:8px;border:1px solid #2a2a2a;background:rgba(255,255,255,.03);color:#888;font-size:9px;font-weight:700;cursor:pointer;font-family:\'Space Mono\',monospace;">PASS</button>' +
       '</div></div>';
   }).join('');
 }
@@ -15595,7 +15628,7 @@ function profForecastTrade(idx) {
   var fc = OC.ownedForecasts;
   if (!fc || !fc[idx]) return;
   var f = fc[idx];
-  // Trading increases accuracy if forecast is correct (simulated: 60% chance correct)
+  var name = _fcName(f);
   var correct = Math.random() < 0.6;
   var pnl = correct ? Math.floor(Math.random()*200+50) : -Math.floor(Math.random()*100+20);
   OC.coins += Math.max(0, pnl);
@@ -15603,26 +15636,26 @@ function profForecastTrade(idx) {
   if (correct) {
     OC.accuracy = Math.min(100, OC.accuracy + 1);
     showToast('✅ TRADE WON! +'+pnl+'⬡ · Accuracy +1%');
-    guildSystemMsg('📈 YOU traded a '+(f.sym||'')+' '+(f.tf||'')+' forecast and WON +'+pnl+'⬡!');
+    guildSystemMsg('📈 YOU traded a '+name+' '+(f.tf||'')+' forecast and WON +'+pnl+'⬡!');
   } else {
     OC.accuracy = Math.max(0, OC.accuracy - 1);
     showToast('❌ TRADE LOST · Accuracy -1% — next time!');
-    guildSystemMsg('📉 YOU traded a '+(f.sym||'')+' '+(f.tf||'')+' forecast — lost.');
+    guildSystemMsg('📉 YOU traded a '+name+' '+(f.tf||'')+' forecast — lost.');
   }
   oracleRenderVaultCoins();
   ocSave();
   renderProfileForecasts();
-  generateDNA(); // DNA changes with activity
+  generateDNA();
 }
 
 function profForecastPass(idx) {
   var fc = OC.ownedForecasts;
   if (!fc || !fc[idx]) return;
   var f = fc[idx];
-  // Passing is safe — no accuracy change, small coin reward for discipline
+  var name = _fcName(f);
   fc.splice(idx, 1);
   OC.coins += 10;
-  showToast('⏭ PASSED on '+(f.sym||'')+' '+(f.tf||'')+' forecast · +10⬡ discipline bonus');
+  showToast('⏭ PASSED on '+name+' '+(f.tf||'')+' · +10⬡ discipline bonus');
   oracleRenderVaultCoins();
   ocSave();
   renderProfileForecasts();
