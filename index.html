@@ -12464,11 +12464,17 @@ function alertPageCardHTML(a) {
   const dirColor = a.dir === 'up' ? 'var(--green)' : 'var(--red)';
   const phaseMatch = (a.dir === _alertPhase.dir);
 
+  // Superseded (unconfirmed replaced by confirmed) — show faded
+  const isSuperseded = a.superseded === true;
+  const isUnconfirmed = a.confirmed === false && !isSuperseded;
+  const isConfirmed = a.confirmed === true;
+  const opacity = isSuperseded ? 'opacity:0.3;' : '';
+
   // Category-based accent color
   let accent = '#555';
   if (/highband|lowband|center/.test(level)) accent = 'var(--red)';
   else if (/vol_[pm]/.test(level)) accent = '#ff6a00';
-  else if (/bullish|bearish/.test(level) && a.type === 'divergence') accent = 'var(--green)';
+  else if (/bullish|bearish/.test(level) && a.type === 'divergence') accent = isConfirmed ? 'var(--green)' : '#888';
   else if (/cross/.test(level)) accent = 'var(--cyan)';
 
   const time = a.time ? new Date(a.time).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
@@ -12483,19 +12489,25 @@ function alertPageCardHTML(a) {
     probBadge = `<span style="background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:5px;padding:2px 6px;font-size:8px;color:#ffd700;margin-left:6px;">⚡ ${p}</span>`;
   }
 
-  const priorityGlow = phaseMatch ? 'box-shadow:0 0 12px rgba(255,106,0,.12),inset 0 0 20px rgba(255,106,0,.03);' : '';
-  const borderCol = phaseMatch ? 'rgba(255,106,0,.35)' : '#1e1e1e';
+  // Confirmation badge for divergences
+  let confBadge = '';
+  if (isUnconfirmed) confBadge = '<span style="background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.25);border-radius:4px;padding:1px 5px;font-size:7px;color:#cca300;font-weight:800;margin-left:4px;">⏳ UNCONFIRMED</span>';
+  else if (isConfirmed) confBadge = '<span style="background:rgba(0,200,100,.12);border:1px solid rgba(0,200,100,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--green);font-weight:800;margin-left:4px;">✅ CONFIRMED</span>';
+  else if (isSuperseded) confBadge = '<span style="font-size:7px;color:#333;margin-left:4px;">superseded</span>';
+
+  const priorityGlow = phaseMatch && !isSuperseded ? 'box-shadow:0 0 12px rgba(255,106,0,.12),inset 0 0 20px rgba(255,106,0,.03);' : '';
+  const borderCol = phaseMatch && !isSuperseded ? 'rgba(255,106,0,.35)' : '#1e1e1e';
   const leftBar = `<div style="position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:${accent};"></div>`;
 
-  return `<div style="position:relative;background:#0d0d0d;border:1px solid ${borderCol};border-radius:14px;padding:12px 12px 12px 16px;margin-bottom:8px;${priorityGlow}">
+  return `<div style="position:relative;background:#0d0d0d;border:1px solid ${borderCol};border-radius:14px;padding:12px 12px 12px 16px;margin-bottom:8px;${priorityGlow}${opacity}">
     ${leftBar}
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;">
-        <div style="font-size:14px;font-weight:800;color:#eee;line-height:1.4;">${displayMsg}${probBadge}</div>
+        <div style="font-size:14px;font-weight:800;color:#eee;line-height:1.4;">${displayMsg}${probBadge}${confBadge}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
           <span style="font-size:9px;color:#444;font-family:'Space Mono',monospace;">${a.asset||'BTC'} · ${a.tf||'4H'}</span>
           <span style="font-size:9px;color:${dirColor};font-family:'Space Mono',monospace;font-weight:700;">${a.dir==='up'?'↑ UP':'↓ DOWN'}</span>
-          ${phaseMatch?'<span style="background:rgba(255,106,0,.15);border:1px solid rgba(255,106,0,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--orange);font-weight:800;">PRIORITY</span>':''}
+          ${phaseMatch&&!isSuperseded?'<span style="background:rgba(255,106,0,.15);border:1px solid rgba(255,106,0,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--orange);font-weight:800;">PRIORITY</span>':''}
           <span style="flex:1;"></span>
           <span style="font-size:8px;color:#333;font-family:'Space Mono',monospace;">${time}</span>
         </div>
