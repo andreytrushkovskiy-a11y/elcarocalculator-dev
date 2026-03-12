@@ -12563,7 +12563,6 @@ function alertPageCardHTML(a) {
 async function alertsPageRender() {
   const feed = document.getElementById('alerts-page-feed');
   const empty = document.getElementById('alerts-page-empty');
-  const countEl = document.getElementById('alerts-page-count');
   if (!feed) return;
 
   feed.innerHTML = '<div style="text-align:center;padding:20px;font-size:10px;color:#333;font-family:\'Space Mono\',monospace;">Loading...</div>';
@@ -12582,7 +12581,7 @@ async function alertsPageRender() {
 
   filtered.sort((a,b) => b.ts - a.ts);
 
-  if (countEl) countEl.textContent = filtered.length + ' signals';
+
 
   if (filtered.length === 0) {
     feed.innerHTML = '';
@@ -16701,9 +16700,7 @@ function pnlDeleteTrade(id) {
         <button onclick="alertPageTF('1W')" class="ap-tf-btn" style="background:#111;border:1px solid #252525;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1W</button>
         <button onclick="alertPageTF('1M')" class="ap-tf-btn" style="background:#111;border:1px solid #252525;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1M</button>
       </div>
-      <div id="alerts-page-phase" style="background:rgba(255,59,92,.12);border:1px solid rgba(255,59,92,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--red);font-family:'Space Mono',monospace;">↓ DESCENDING</div>
-      <div style="flex:1;"></div>
-      <div id="alerts-page-count" style="font-size:10px;color:#444;font-family:'Space Mono',monospace;">0</div>
+      <div id="alerts-page-phase" style="background:rgba(255,59,92,.12);border:1px solid rgba(255,59,92,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--red);font-family:'Space Mono',monospace;white-space:nowrap;">↓ DESCENDING</div>
     </div>
   </div>
 
