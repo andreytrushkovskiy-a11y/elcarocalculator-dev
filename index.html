@@ -10966,6 +10966,9 @@ function initSigmaButtons() {
       <div class="op-tab active" onclick="oracleTab('vault',this)">
         <span class="op-tab-icon">⬡</span>VAULT
       </div>
+      <div class="op-tab" onclick="oracleTab('alerts',this)">
+        <span class="op-tab-icon">🔔</span>ALERTS
+      </div>
       <div class="op-tab" onclick="oracleTab('quests',this)">
         <span class="op-tab-icon">📜</span>QUESTS
       </div>
@@ -11089,6 +11092,82 @@ function initSigmaButtons() {
           </div>
         </div>
       </div>
+
+        </div>
+      </div>
+
+      <!-- ══ ALERTS — HSHS_VOL_DIV_MTF ══ -->
+      <div class="op-screen" id="op-alerts" style="display:none;">
+        <div class="scrollable-op">
+
+        <div class="slabel" style="padding-top:6px;">HSHS ALERTS <span style="font-size:8px;color:#555;font-family:'Space Mono',monospace;font-weight:400;margin-left:6px;">VOL · DIV · MTF</span></div>
+
+        <!-- Phase Configuration -->
+        <div style="margin:0 12px 10px;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:16px;padding:14px;">
+          <div style="font-size:9px;color:#444;font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:10px;">PHASE CONFIGURATION</div>
+
+          <!-- Asset -->
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;" id="alert-asset-row">
+            <button class="alert-asset-btn active" onclick="alertSelectAsset(this,'BTC')" style="flex:1;min-width:60px;background:rgba(247,147,26,.15);border:1px solid rgba(247,147,26,.4);border-radius:10px;padding:8px 4px;font-size:11px;font-weight:800;color:#f7931a;cursor:pointer;font-family:'Space Mono',monospace;">₿ BTC</button>
+            <button class="alert-asset-btn" onclick="alertSelectAsset(this,'ETH')" style="flex:1;min-width:60px;background:#111;border:1px solid #252525;border-radius:10px;padding:8px 4px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">Ξ ETH</button>
+            <button class="alert-asset-btn" onclick="alertSelectAsset(this,'SOL')" style="flex:1;min-width:60px;background:#111;border:1px solid #252525;border-radius:10px;padding:8px 4px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">◎ SOL</button>
+            <button class="alert-asset-btn" onclick="alertSelectAsset(this,'GOLD')" style="flex:1;min-width:60px;background:#111;border:1px solid #252525;border-radius:10px;padding:8px 4px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">⬡ GOLD</button>
+          </div>
+
+          <!-- Timeframe -->
+          <div style="display:flex;gap:6px;margin-bottom:10px;" id="alert-tf-row">
+            <button class="alert-tf-btn" onclick="alertSelectTF(this,'1W')" style="flex:1;background:#111;border:1px solid #252525;border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1W</button>
+            <button class="alert-tf-btn active" onclick="alertSelectTF(this,'1D')" style="flex:1;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.4);border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:var(--cyan);cursor:pointer;font-family:'Space Mono',monospace;">1D</button>
+            <button class="alert-tf-btn" onclick="alertSelectTF(this,'4H')" style="flex:1;background:#111;border:1px solid #252525;border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">4H</button>
+          </div>
+
+          <!-- Phase direction -->
+          <div style="display:flex;gap:6px;margin-bottom:10px;" id="alert-phase-row">
+            <button class="alert-phase-btn" id="alert-phase-up" onclick="alertSelectPhase('up')" style="flex:1;background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.3);border-radius:10px;padding:9px;font-size:11px;font-weight:800;color:var(--green);cursor:pointer;font-family:'Space Mono',monospace;">↑ ASCENDING</button>
+            <button class="alert-phase-btn active" id="alert-phase-down" onclick="alertSelectPhase('down')" style="flex:1;background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);border-radius:10px;padding:9px;font-size:11px;font-weight:800;color:var(--red);cursor:pointer;font-family:'Space Mono',monospace;">↓ DESCENDING</button>
+          </div>
+
+          <!-- Date range -->
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div style="flex:1;">
+              <div style="font-size:8px;color:#444;font-family:'Space Mono',monospace;margin-bottom:3px;">FROM</div>
+              <input type="date" id="alert-date-from" style="width:100%;background:#181818;border:1px solid #252525;border-radius:8px;padding:7px;font-size:11px;color:#ccc;font-family:'Space Mono',monospace;box-sizing:border-box;" />
+            </div>
+            <div style="color:#333;font-size:14px;margin-top:12px;">→</div>
+            <div style="flex:1;">
+              <div style="font-size:8px;color:#444;font-family:'Space Mono',monospace;margin-bottom:3px;">TO</div>
+              <input type="date" id="alert-date-to" style="width:100%;background:#181818;border:1px solid #252525;border-radius:8px;padding:7px;font-size:11px;color:#ccc;font-family:'Space Mono',monospace;box-sizing:border-box;" />
+            </div>
+          </div>
+
+          <!-- Save / Load -->
+          <button onclick="alertSavePhase()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,rgba(255,106,0,.2),rgba(255,106,0,.08));border:1px solid rgba(255,106,0,.4);border-radius:10px;padding:10px;font-size:11px;font-weight:800;color:var(--orange);cursor:pointer;font-family:'Space Mono',monospace;">✓ SAVE PHASE & FETCH ALERTS</button>
+        </div>
+
+        <!-- Legend -->
+        <div style="margin:0 12px 8px;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:14px;padding:12px;">
+          <div style="font-size:8px;color:#333;font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:8px;">SIGNAL LEVELS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:9px;font-family:'Space Mono',monospace;">
+            <div><span style="color:var(--red);">●</span> <span style="color:#888;">CHANNEL TOP</span></div>
+            <div><span style="color:var(--green);">●</span> <span style="color:#888;">CHANNEL BOTTOM</span></div>
+            <div><span style="color:#888;">●</span> <span style="color:#888;">CHANNEL CENTER</span></div>
+            <div><span style="color:#ffd700;">●</span> <span style="color:#888;">DIVERGENCE</span></div>
+            <div><span style="color:#ff6a00;">●</span> <span style="color:#888;">σ1 (68%)</span></div>
+            <div><span style="color:#ff3b5c;">●</span> <span style="color:#888;">σ2 (95%)</span></div>
+            <div><span style="color:#8b0000;">●</span> <span style="color:#888;">σ3 (99%)</span></div>
+            <div></div>
+          </div>
+        </div>
+
+        <!-- Alerts feed -->
+        <div class="slabel">LIVE ALERTS <span style="font-size:8px;color:#555;font-family:'Space Mono',monospace;font-weight:400;margin-left:6px;" id="alert-count-label">0 SIGNALS</span></div>
+        <div id="alerts-feed" style="margin:0 12px;"></div>
+
+        <!-- Empty state -->
+        <div id="alerts-empty" style="margin:40px 12px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:10px;">📡</div>
+          <div style="font-size:11px;color:#444;font-family:'Space Mono',monospace;">No alerts yet. Configure phase and save to start receiving signals.</div>
+        </div>
 
         </div>
       </div>
@@ -12163,7 +12242,7 @@ function oracleClose() {
 }
 
 function oracleTab(name, el) {
-  const sections = ['vault','quests','prophecies','guild','traders','news','oracle','profile'];
+  const sections = ['vault','alerts','quests','prophecies','guild','traders','news','oracle','profile'];
   sections.forEach(s => {
     const sec = document.getElementById('op-' + s);
     if (sec) sec.style.display = (s === name) ? 'block' : 'none';
@@ -12190,6 +12269,7 @@ function oracleRenderAll() {
 }
 function oracleRenderTab(name) {
   if (name==='vault')       { oracleRenderVault(); }
+  if (name==='alerts')      { alertsRenderFeed(); }
   if (name==='quests')      { opRenderQuests(); }
   if (name==='prophecies')  { opRenderArenaDuels(); renderOracleCallsBets(); }
   if (name==='guild')       { opRenderGuild(); }
@@ -12211,6 +12291,209 @@ function renderOracleCallsBets() {
     // Hide YES/NO buttons for already-bet cards
     if (betEl) { const btnsDiv = betEl.parentElement.querySelector('.verdict-btns'); if (btnsDiv) btnsDiv.style.display='none'; }
   });
+}
+
+// ═══════════════════════════════════════
+//  HSHS ALERTS — VOL_DIV_MTF
+// ═══════════════════════════════════════
+const ALERTS_API = 'https://elcaro-blofin-proxy.andreytrushkovskiy.workers.dev';
+let _alertPhase = JSON.parse(localStorage.getItem('elcaro_alert_phase') || 'null') || {
+  asset: 'BTC', tf: '1D', dir: 'down',
+  from: '', to: ''
+};
+let _alertsCache = [];
+let _alertsPollTimer = null;
+
+function alertSelectAsset(btn, asset) {
+  _alertPhase.asset = asset;
+  document.querySelectorAll('#alert-asset-row .alert-asset-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '#111'; b.style.borderColor = '#252525'; b.style.color = '#666';
+  });
+  btn.classList.add('active');
+  const colors = { BTC:'247,147,26', ETH:'98,126,234', SOL:'153,69,255', GOLD:'255,215,0' };
+  const c = colors[asset] || '255,106,0';
+  btn.style.background = `rgba(${c},.15)`; btn.style.borderColor = `rgba(${c},.4)`;
+  btn.style.color = `rgb(${c})`;
+}
+
+function alertSelectTF(btn, tf) {
+  _alertPhase.tf = tf;
+  document.querySelectorAll('#alert-tf-row .alert-tf-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '#111'; b.style.borderColor = '#252525'; b.style.color = '#666';
+  });
+  btn.classList.add('active');
+  btn.style.background = 'rgba(0,229,255,.12)'; btn.style.borderColor = 'rgba(0,229,255,.4)';
+  btn.style.color = 'var(--cyan)';
+}
+
+function alertSelectPhase(dir) {
+  _alertPhase.dir = dir;
+  const upBtn = document.getElementById('alert-phase-up');
+  const dnBtn = document.getElementById('alert-phase-down');
+  if (dir === 'up') {
+    upBtn.classList.add('active');
+    upBtn.style.background = 'rgba(0,200,150,.15)'; upBtn.style.borderColor = 'rgba(0,200,150,.4)'; upBtn.style.color = 'var(--green)';
+    dnBtn.classList.remove('active');
+    dnBtn.style.background = '#111'; dnBtn.style.borderColor = '#252525'; dnBtn.style.color = '#666';
+  } else {
+    dnBtn.classList.add('active');
+    dnBtn.style.background = 'rgba(255,59,92,.15)'; dnBtn.style.borderColor = 'rgba(255,59,92,.4)'; dnBtn.style.color = 'var(--red)';
+    upBtn.classList.remove('active');
+    upBtn.style.background = '#111'; upBtn.style.borderColor = '#252525'; upBtn.style.color = '#666';
+  }
+}
+
+function alertSavePhase() {
+  _alertPhase.from = document.getElementById('alert-date-from').value;
+  _alertPhase.to = document.getElementById('alert-date-to').value;
+  localStorage.setItem('elcaro_alert_phase', JSON.stringify(_alertPhase));
+  showToast('✓ Phase saved: ' + _alertPhase.asset + ' ' + _alertPhase.tf + ' ' + (_alertPhase.dir==='up'?'↑ ASCENDING':'↓ DESCENDING'));
+  alertsRenderFeed();
+}
+
+function alertRestorePhase() {
+  if (_alertPhase.from) document.getElementById('alert-date-from').value = _alertPhase.from;
+  if (_alertPhase.to) document.getElementById('alert-date-to').value = _alertPhase.to;
+  // Restore asset button
+  const assetBtns = document.querySelectorAll('#alert-asset-row .alert-asset-btn');
+  assetBtns.forEach(b => {
+    if (b.textContent.includes(_alertPhase.asset)) alertSelectAsset(b, _alertPhase.asset);
+  });
+  // Restore TF
+  const tfBtns = document.querySelectorAll('#alert-tf-row .alert-tf-btn');
+  tfBtns.forEach(b => {
+    if (b.textContent.trim() === _alertPhase.tf) alertSelectTF(b, _alertPhase.tf);
+  });
+  // Restore phase dir
+  alertSelectPhase(_alertPhase.dir);
+}
+
+async function alertsFetch() {
+  try {
+    const params = new URLSearchParams({ asset: _alertPhase.asset, tf: _alertPhase.tf, limit: '50' });
+    const res = await fetch(ALERTS_API + '/alerts?' + params.toString());
+    const data = await res.json();
+    if (data.alerts) {
+      _alertsCache = data.alerts;
+      return data.alerts;
+    }
+  } catch(e) {
+    console.warn('Alerts fetch error:', e);
+  }
+  return _alertsCache;
+}
+
+function alertCardHTML(a) {
+  const levelNames = {
+    channel_top: 'CHANNEL TOP', channel_center: 'CHANNEL CENTER', channel_bottom: 'CHANNEL BOTTOM',
+    sigma_p1: '+σ1 (68%)', sigma_p2: '+σ2 (95%)', sigma_p3: '+σ3 (99%)',
+    sigma_m1: '-σ1 (68%)', sigma_m2: '-σ2 (95%)', sigma_m3: '-σ3 (99%)',
+    bullish_regular: 'BULL DIV (Regular)', bullish_hidden: 'BULL DIV (Hidden)',
+    bearish_regular: 'BEAR DIV (Regular)', bearish_hidden: 'BEAR DIV (Hidden)',
+  };
+  const levelColors = {
+    channel_top: 'var(--red)', channel_center: '#888', channel_bottom: 'var(--green)',
+    sigma_p1: '#ff6a00', sigma_p2: '#ff3b5c', sigma_p3: '#8b0000',
+    sigma_m1: '#00c896', sigma_m2: '#00e676', sigma_m3: '#00ff88',
+    bullish_regular: 'var(--green)', bullish_hidden: 'rgba(0,200,150,.7)',
+    bearish_regular: 'var(--red)', bearish_hidden: 'rgba(255,59,92,.7)',
+  };
+  const emoji = {
+    channel_top: '🔴', channel_center: '⚪', channel_bottom: '🟢',
+    sigma_p1: '🟡', sigma_p2: '🟠', sigma_p3: '🔴',
+    sigma_m1: '🟡', sigma_m2: '🟢', sigma_m3: '💚',
+    bullish_regular: '📈', bullish_hidden: '📈', bearish_regular: '📉', bearish_hidden: '📉',
+  };
+  const isDivergence = a.type === 'divergence';
+  const level = a.level || 'unknown';
+  const lName = levelNames[level] || level.replace(/_/g,' ').toUpperCase();
+  const lColor = levelColors[level] || '#888';
+  const icon = emoji[level] || '📊';
+  const dirArrow = a.dir === 'up' ? '↑' : '↓';
+  const dirColor = a.dir === 'up' ? 'var(--green)' : 'var(--red)';
+  const phaseMatch = ((_alertPhase.dir === 'down' && a.dir === 'down') || (_alertPhase.dir === 'up' && a.dir === 'up'));
+  const priorityBadge = phaseMatch
+    ? '<span style="background:rgba(255,106,0,.15);border:1px solid rgba(255,106,0,.3);border-radius:5px;padding:2px 6px;font-size:7px;color:var(--orange);margin-left:6px;">PRIORITY</span>'
+    : '';
+
+  const time = a.time ? new Date(a.time).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+
+  // Sigma probability info
+  let probInfo = '';
+  if (level.startsWith('sigma_')) {
+    const sigNum = level.charAt(level.length-1);
+    const probs = {'1':'68%','2':'95%','3':'99.7%'};
+    probInfo = `<div style="font-size:8px;color:#555;font-family:'Space Mono',monospace;margin-top:4px;">⚡ Reversal probability: <span style="color:var(--gold);">${probs[sigNum]||''}</span></div>`;
+  }
+
+  return `<div style="background:#0d0d0d;border:1px solid ${phaseMatch?'rgba(255,106,0,.3)':'#1e1e1e'};border-radius:14px;padding:12px;margin-bottom:8px;${phaseMatch?'box-shadow:0 0 8px rgba(255,106,0,.08);':''}">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="font-size:16px;">${icon}</div>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:800;color:${lColor};">${lName}${priorityBadge}</div>
+        <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-top:2px;">${a.asset||''} · ${a.tf||''} · ${time}</div>
+      </div>
+      <div style="font-size:16px;font-weight:900;color:${dirColor};">${dirArrow}</div>
+    </div>
+    ${a.msg ? `<div style="font-size:10px;color:#777;line-height:1.4;">${a.msg}</div>` : ''}
+    ${isDivergence ? `<div style="font-size:8px;color:#555;font-family:'Space Mono',monospace;margin-top:4px;">🔀 ${level.includes('bullish')?'Bullish':'Bearish'} · ${level.includes('hidden')?'Hidden':'Regular'}</div>` : ''}
+    ${probInfo}
+  </div>`;
+}
+
+async function alertsRenderFeed() {
+  alertRestorePhase();
+  const feed = document.getElementById('alerts-feed');
+  const empty = document.getElementById('alerts-empty');
+  const countLabel = document.getElementById('alert-count-label');
+  if (!feed) return;
+
+  feed.innerHTML = '<div style="text-align:center;padding:20px;"><div style="font-size:11px;color:#444;font-family:\'Space Mono\',monospace;">Loading alerts...</div></div>';
+
+  const alerts = await alertsFetch();
+
+  // Filter by date range if set
+  let filtered = alerts;
+  if (_alertPhase.from) {
+    const fromTs = new Date(_alertPhase.from).getTime();
+    filtered = filtered.filter(a => a.ts >= fromTs);
+  }
+  if (_alertPhase.to) {
+    const toTs = new Date(_alertPhase.to).getTime() + 86400000; // end of day
+    filtered = filtered.filter(a => a.ts <= toTs);
+  }
+
+  // Sort: phase-matching direction first, then by time
+  filtered.sort((a,b) => {
+    const aMatch = (a.dir === _alertPhase.dir) ? 0 : 1;
+    const bMatch = (b.dir === _alertPhase.dir) ? 0 : 1;
+    if (aMatch !== bMatch) return aMatch - bMatch;
+    return b.ts - a.ts;
+  });
+
+  if (countLabel) countLabel.textContent = filtered.length + ' SIGNALS';
+
+  if (filtered.length === 0) {
+    feed.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+
+  if (empty) empty.style.display = 'none';
+  feed.innerHTML = filtered.map(a => alertCardHTML(a)).join('');
+
+  // Start auto-refresh every 30s
+  if (_alertsPollTimer) clearInterval(_alertsPollTimer);
+  _alertsPollTimer = setInterval(() => {
+    if (document.getElementById('op-alerts') && document.getElementById('op-alerts').style.display !== 'none') {
+      alertsRenderFeed();
+    } else {
+      clearInterval(_alertsPollTimer);
+      _alertsPollTimer = null;
+    }
+  }, 30000);
 }
 
 function oracleUpdateNewsStatus() {
