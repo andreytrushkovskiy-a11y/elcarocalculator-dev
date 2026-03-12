@@ -12968,49 +12968,118 @@ function orcUnlockNews(e) {
 }
 
 // ── TELEGRAM FEED ──────────────────────────────────
+// ── Telegram news: multi-proxy fallback + embed widget fallback ──
+const TG_CORS_PROXIES = [
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+];
+
+async function _fetchTgHtml() {
+  const target = 'https://t.me/s/' + TG_CHANNEL;
+  for (const mkUrl of TG_CORS_PROXIES) {
+    try {
+      const res = await fetch(mkUrl(target), { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const html = await res.text();
+      // Validate it's actually Telegram HTML
+      if (html.includes('tgme_widget_message')) return html;
+    } catch(e) { /* try next proxy */ }
+  }
+  return null;
+}
+
+function _parseTgMessages(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const msgs = Array.from(doc.querySelectorAll('.tgme_widget_message_wrap')).reverse().slice(0,12);
+  return msgs.map(m => {
+    const textEl = m.querySelector('.tgme_widget_message_text');
+    const raw = textEl ? textEl.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim() : '';
+    if (!raw) return null;
+    const preview = raw.length > 280 ? raw.slice(0,280) + '…' : raw;
+    const timeEl = m.querySelector('.tgme_widget_message_date time');
+    const time = timeEl ? timeEl.getAttribute('datetime') : '';
+    const ts = time ? new Date(time).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+    const photoEl = m.querySelector('.tgme_widget_message_photo_wrap');
+    let imgHtml = '';
+    if (photoEl) {
+      const style = photoEl.getAttribute('style') || '';
+      const um = style.match(/url\(['"]?([^'")\s]+)['"]?\)/);
+      if (um) imgHtml = '<img src="'+um[1]+'" style="width:100%;border-radius:8px;display:block;margin-bottom:8px;max-height:180px;object-fit:cover;" onerror="this.style.display=\'none\'" />';
+    }
+    const msgLink = m.querySelector('.tgme_widget_message_date');
+    const href = msgLink ? (msgLink.getAttribute('href') || 'https://t.me/equtr') : 'https://t.me/equtr';
+    const postId = href.match(/\/(\d+)$/);
+    return { preview, ts, imgHtml, href, postId: postId ? postId[1] : null };
+  }).filter(Boolean);
+}
+
+function _renderTgCards(posts) {
+  return posts.map(p =>
+    '<div style="background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:12px;margin:0 12px 8px;cursor:pointer;" onclick="window.open(\''+p.href+'\',\'_blank\')">' +
+      p.imgHtml +
+      '<div style="font-size:10px;font-weight:500;color:#ccc;line-height:1.55;white-space:pre-wrap;">'+p.preview+'</div>' +
+      (p.ts ? '<div style="font-size:8px;color:#555;font-family:\'Space Mono\',monospace;margin-top:6px;">📢 @equtr · '+p.ts+'</div>' : '') +
+    '</div>'
+  ).join('');
+}
+
+function _renderTgEmbeds(latestId, count) {
+  // Fallback: Telegram native embed widgets (no CORS needed)
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const pid = latestId - i;
+    html += '<div style="margin:0 12px 8px;border-radius:12px;overflow:hidden;background:#111;min-height:100px;">' +
+      '<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-post="equtr/'+pid+'" data-width="100%" data-dark="1" data-color="F5A623" data-dark-color="F5A623"><\/script>' +
+    '</div>';
+  }
+  return html;
+}
+
 async function loadTelegramNews() {
   const list = document.getElementById('tg-news-list');
   if (!list) return;
   list.innerHTML = '<div style="text-align:center;padding:30px;color:#555;font-family:\'Space Mono\',monospace;font-size:10px;">Loading @equtr feed…</div>';
-  try {
-    const proxy = 'https://corsproxy.io/?url=' + encodeURIComponent('https://t.me/s/' + TG_CHANNEL);
-    const res  = await fetch(proxy, { signal: AbortSignal.timeout(9000) });
-    const html = await res.text();
-    const doc  = new DOMParser().parseFromString(html, 'text/html');
-    const msgs = Array.from(doc.querySelectorAll('.tgme_widget_message_wrap')).reverse().slice(0,12);
-    if (!msgs.length) throw new Error('empty');
-    const cards = msgs.map(m => {
-      const textEl = m.querySelector('.tgme_widget_message_text');
-      const raw    = textEl ? textEl.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim() : '';
-      if (!raw) return '';
-      const preview = raw.length > 200 ? raw.slice(0,200) + '…' : raw;
-      const timeEl = m.querySelector('.tgme_widget_message_date time');
-      const time   = timeEl ? timeEl.getAttribute('datetime') : '';
-      const ts = time ? new Date(time).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-      const photoEl = m.querySelector('.tgme_widget_message_photo_wrap');
-      let imgHtml = '';
-      if (photoEl) {
-        const style = photoEl.getAttribute('style') || '';
-        const um = style.match(/url\(['"]?([^'")\s]+)['"]?\)/);
-        if (um) imgHtml = `<img src="${um[1]}" style="width:100%;border-radius:8px;display:block;margin-bottom:8px;max-height:180px;object-fit:cover;" onerror="this.style.display='none'" />`;
-      }
-      const msgLink = m.querySelector('.tgme_widget_message_date');
-      const href = msgLink ? (msgLink.getAttribute('href') || 'https://t.me/equtr') : 'https://t.me/equtr';
-      return `<div style="background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:12px;margin:0 12px 8px;cursor:pointer;" onclick="window.open('${href}','_blank')">
-        ${imgHtml}
-        <div style="font-size:10px;font-weight:500;color:#ccc;line-height:1.55;white-space:pre-wrap;">${preview}</div>
-        ${ts ? `<div style="font-size:8px;color:#555;font-family:'Space Mono',monospace;margin-top:6px;">📢 @equtr · ${ts}</div>` : ''}
-      </div>`;
-    }).filter(Boolean);
-    list.innerHTML = cards.join('') || '<div style="text-align:center;padding:20px;color:#555;font-size:10px;">No posts found</div>';
-  } catch(err) {
-    list.innerHTML = `<div style="margin:0 12px 8px;background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:18px;text-align:center;">
-      <div style="font-size:22px;margin-bottom:8px;">📢</div>
-      <div style="font-size:12px;font-weight:800;margin-bottom:4px;">ELCARO QUANTUM TRADE</div>
-      <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-bottom:12px;">BTC · GOLD · S&P500 live forecasts</div>
-      <a href="https://t.me/equtr" target="_blank" style="display:block;background:#1d8bd6;border-radius:10px;padding:11px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;">📲 OPEN @equtr IN TELEGRAM</a>
-    </div>`;
+
+  // Try proxy-based parsing first
+  const html = await _fetchTgHtml();
+  if (html) {
+    const posts = _parseTgMessages(html);
+    if (posts.length) {
+      list.innerHTML = _renderTgCards(posts);
+      // Cache latest post ID for embed fallback
+      if (posts[0].postId) localStorage.setItem('tg_equtr_latest', posts[0].postId);
+      return;
+    }
   }
+
+  // Fallback: use Telegram embed widgets (always works, no CORS)
+  const cachedLatest = parseInt(localStorage.getItem('tg_equtr_latest')) || 9089;
+  list.innerHTML =
+    '<div style="padding:0 12px 8px;"><div style="font-size:9px;color:#f5a623;font-family:\'Space Mono\',monospace;margin-bottom:8px;">⚡ LIVE TELEGRAM EMBEDS · @equtr</div></div>' +
+    _renderTgEmbeds(cachedLatest, 8);
+
+  // Also try to discover the latest post ID for next time
+  _discoverLatestPostId();
+}
+
+async function _discoverLatestPostId() {
+  // Fetch the channel page directly (works server-side, may fail from browser)
+  try {
+    // Use Telegram's own widget to probe for latest ID
+    const probe = parseInt(localStorage.getItem('tg_equtr_latest')) || 9089;
+    // Try a higher ID to see if it exists
+    for (let tryId = probe + 5; tryId > probe; tryId--) {
+      try {
+        const res = await fetch('https://t.me/equtr/' + tryId + '?embed=1', { signal: AbortSignal.timeout(4000) });
+        const text = await res.text();
+        if (text.includes('tgme_widget_message_text')) {
+          localStorage.setItem('tg_equtr_latest', String(tryId));
+          return;
+        }
+      } catch(e) {}
+    }
+  } catch(e) {}
 }
 
 // ── YOUTUBE FEED ──────────────────────────────────
