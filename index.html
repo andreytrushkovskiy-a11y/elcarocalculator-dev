@@ -12229,8 +12229,11 @@ function renderOracleCallsBets() {
 const ALERTS_API = 'https://elcaro-blofin-proxy.andreytrushkovskiy.workers.dev';
 let _alertPhase = JSON.parse(localStorage.getItem('elcaro_alert_phase') || 'null') || {
   asset: 'BTC', tf: '4H', dir: 'down',
-  from: '', to: ''
+  from: '', to: '',
+  phases: { '4H':'down', '1D':'down', '1W':'down', '1M':'down' }
 };
+// Migrate old format
+if (!_alertPhase.phases) _alertPhase.phases = { '4H': _alertPhase.dir||'down', '1D':'down', '1W':'down', '1M':'down' };
 let _alertsCache = [];
 let _alertsPollTimer = null;
 
@@ -12427,12 +12430,17 @@ function alertsPageInit() {
   const ph = _alertPhase;
   if (ph.from) document.getElementById('ap-date-from').value = ph.from;
   if (ph.to) document.getElementById('ap-date-to').value = ph.to;
-  alertPagePhase(ph.dir, true);
-  alertPageTF(ph.tf || '4H');
+  // Restore per-TF phase
+  const tf = ph.tf || '4H';
+  _alertPhase.dir = (ph.phases && ph.phases[tf]) || ph.dir || 'down';
+  alertPagePhase(_alertPhase.dir, true);
+  alertUpdateMarketBadge();
+  alertPageTF(tf);
 }
 
 function alertPagePhase(dir, noSave) {
   _alertPhase.dir = dir;
+  _alertPhase.phases[_alertPhase.tf] = dir;
   const upBtn = document.getElementById('ap-phase-up');
   const dnBtn = document.getElementById('ap-phase-down');
   if (dir === 'up') {
@@ -12442,7 +12450,7 @@ function alertPagePhase(dir, noSave) {
     dnBtn.style.background = 'rgba(255,59,92,.15)'; dnBtn.style.borderColor = 'rgba(255,59,92,.4)'; dnBtn.style.color = 'var(--red)';
     upBtn.style.background = '#111'; upBtn.style.borderColor = '#252525'; upBtn.style.color = '#666';
   }
-  // Update header badge
+  // Update per-TF phase badge in header
   const badge = document.getElementById('alerts-page-phase');
   if (badge) {
     badge.textContent = dir === 'up' ? '↑ ASCENDING' : '↓ DESCENDING';
@@ -12450,7 +12458,27 @@ function alertPagePhase(dir, noSave) {
     badge.style.background = dir === 'up' ? 'rgba(0,200,150,.12)' : 'rgba(255,59,92,.12)';
     badge.style.borderColor = dir === 'up' ? 'rgba(0,200,150,.3)' : 'rgba(255,59,92,.3)';
   }
+  // BULL/BEAR MARKET badge based on 1W phase
+  alertUpdateMarketBadge();
   if (!noSave) { alertPageSave(); alertsPageRender(); }
+}
+
+function alertUpdateMarketBadge() {
+  const badge = document.getElementById('alerts-market-badge');
+  if (!badge) return;
+  const w = _alertPhase.phases['1W'] || 'down';
+  if (w === 'up') {
+    badge.textContent = '🐂 BULL MARKET';
+    badge.style.color = 'var(--green)';
+    badge.style.background = 'rgba(0,200,150,.1)';
+    badge.style.borderColor = 'rgba(0,200,150,.25)';
+  } else {
+    badge.textContent = '🐻 BEAR MARKET';
+    badge.style.color = 'var(--red)';
+    badge.style.background = 'rgba(255,59,92,.1)';
+    badge.style.borderColor = 'rgba(255,59,92,.25)';
+  }
+  badge.style.display = 'inline-block';
 }
 
 function alertPageTF(tf) {
@@ -12459,13 +12487,16 @@ function alertPageTF(tf) {
   document.querySelectorAll('#ap-tf-row .ap-tf-btn').forEach(b => {
     b.style.background = '#111'; b.style.borderColor = '#252525'; b.style.color = '#666';
   });
-  const btns = document.querySelectorAll('#ap-tf-row .ap-tf-btn');
-  btns.forEach(b => {
+  document.querySelectorAll('#ap-tf-row .ap-tf-btn').forEach(b => {
     if (b.textContent.trim() === tf) {
       const c = tfColors[tf] || '255,140,40';
       b.style.background = `rgba(${c},.15)`; b.style.borderColor = `rgba(${c},.4)`; b.style.color = `rgb(${c})`;
     }
   });
+  // Restore phase direction for this TF
+  const dir = _alertPhase.phases[tf] || 'down';
+  _alertPhase.dir = dir;
+  alertPagePhase(dir, true);
   alertPageSave();
   alertsPageRender();
 }
@@ -16655,7 +16686,10 @@ function pnlDeleteTrade(id) {
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
       <div style="font-size:28px;">📡</div>
       <div>
-        <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:900;color:#ff6a00;letter-spacing:1px;">TRADING FILTER ALERTS</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:900;color:#ff6a00;letter-spacing:1px;">TRADING FILTER ALERTS</span>
+          <span id="alerts-market-badge" style="display:none;border:1px solid rgba(255,59,92,.25);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:800;font-family:'Space Mono',monospace;"></span>
+        </div>
         <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-top:2px;">VOL · DIV · MTF — LIVE SIGNALS</div>
       </div>
     </div>
