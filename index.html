@@ -12479,7 +12479,6 @@ function alertPageSave() {
 function alertPageCardHTML(a) {
   const level = a.level || 'unknown';
   const dirColor = a.dir === 'up' ? 'var(--green)' : 'var(--red)';
-  const phaseMatch = (a.dir === _alertPhase.dir);
 
   // Superseded (unconfirmed replaced by confirmed) — show faded
   const isSuperseded = a.superseded === true;
@@ -12512,11 +12511,9 @@ function alertPageCardHTML(a) {
   else if (isConfirmed) confBadge = '<span style="background:rgba(0,200,100,.12);border:1px solid rgba(0,200,100,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--green);font-weight:800;margin-left:4px;">✅ CONFIRMED</span>';
   else if (isSuperseded) confBadge = '<span style="font-size:7px;color:#333;margin-left:4px;">superseded</span>';
 
-  const priorityGlow = phaseMatch && !isSuperseded ? 'box-shadow:0 0 12px rgba(255,106,0,.12),inset 0 0 20px rgba(255,106,0,.03);' : '';
-  const borderCol = phaseMatch && !isSuperseded ? 'rgba(255,106,0,.35)' : '#1e1e1e';
   const leftBar = `<div style="position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:${accent};"></div>`;
 
-  return `<div style="position:relative;background:#0d0d0d;border:1px solid ${borderCol};border-radius:14px;padding:12px 12px 12px 16px;margin-bottom:8px;${priorityGlow}${opacity}">
+  return `<div style="position:relative;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:14px;padding:12px 12px 12px 16px;margin-bottom:8px;${opacity}">
     ${leftBar}
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;">
@@ -12524,7 +12521,6 @@ function alertPageCardHTML(a) {
         <div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
           <span style="font-size:9px;color:#444;font-family:'Space Mono',monospace;">${a.asset||'BTC'} · ${a.tf||'4H'}</span>
           <span style="font-size:9px;color:${dirColor};font-family:'Space Mono',monospace;font-weight:700;">${a.dir==='up'?'↑ UP':'↓ DOWN'}</span>
-          ${phaseMatch&&!isSuperseded?'<span style="background:rgba(255,106,0,.15);border:1px solid rgba(255,106,0,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--orange);font-weight:800;">PRIORITY</span>':''}
           <span style="flex:1;"></span>
           <span style="font-size:8px;color:#333;font-family:'Space Mono',monospace;">${time}</span>
         </div>
@@ -12553,12 +12549,7 @@ async function alertsPageRender() {
     filtered = filtered.filter(a => a.ts <= toTs);
   }
 
-  filtered.sort((a,b) => {
-    const aM = (a.dir === _alertPhase.dir) ? 0 : 1;
-    const bM = (b.dir === _alertPhase.dir) ? 0 : 1;
-    if (aM !== bM) return aM - bM;
-    return b.ts - a.ts;
-  });
+  filtered.sort((a,b) => b.ts - a.ts);
 
   if (countEl) countEl.textContent = filtered.length + ' signals';
 
