@@ -12228,12 +12228,15 @@ function renderOracleCallsBets() {
 // ═══════════════════════════════════════
 const ALERTS_API = 'https://elcaro-blofin-proxy.andreytrushkovskiy.workers.dev';
 let _alertPhase = JSON.parse(localStorage.getItem('elcaro_alert_phase') || 'null') || {
-  asset: 'BTC', tf: '4H', dir: 'down',
-  from: '', to: '',
-  phases: { '4H':'down', '1D':'down', '1W':'down', '1M':'down' }
+  asset: 'BTC', tf: '4H', dir: 'down', from: '', to: '',
+  phases: { '4H':'down', '1D':'down', '1W':'down', '1M':'down' },
+  dates: { '4H':{from:'',to:''}, '1D':{from:'',to:''}, '1W':{from:'',to:''}, '1M':{from:'',to:''} }
 };
-// Migrate old format
+// Migrate old formats
 if (!_alertPhase.phases) _alertPhase.phases = { '4H': _alertPhase.dir||'down', '1D':'down', '1W':'down', '1M':'down' };
+if (!_alertPhase.dates) {
+  _alertPhase.dates = { '4H':{from:_alertPhase.from||'',to:_alertPhase.to||''}, '1D':{from:'',to:''}, '1W':{from:'',to:''}, '1M':{from:'',to:''} };
+}
 let _alertsCache = [];
 let _alertsPollTimer = null;
 
@@ -12426,12 +12429,15 @@ async function alertsRenderFeed() {
 
 // ── ALERTS PAGE (standalone main page) ──
 function alertsPageInit() {
-  // Restore phase
   const ph = _alertPhase;
-  if (ph.from) document.getElementById('ap-date-from').value = ph.from;
-  if (ph.to) document.getElementById('ap-date-to').value = ph.to;
-  // Restore per-TF phase
   const tf = ph.tf || '4H';
+  // Restore per-TF dates
+  const d = (ph.dates && ph.dates[tf]) || { from: ph.from||'', to: ph.to||'' };
+  document.getElementById('ap-date-from').value = d.from || '';
+  document.getElementById('ap-date-to').value = d.to || '';
+  _alertPhase.from = d.from || '';
+  _alertPhase.to = d.to || '';
+  // Restore per-TF phase
   _alertPhase.dir = (ph.phases && ph.phases[tf]) || ph.dir || 'down';
   alertPagePhase(_alertPhase.dir, true);
   alertUpdateMarketBadge();
@@ -12482,6 +12488,14 @@ function alertUpdateMarketBadge() {
 }
 
 function alertPageTF(tf) {
+  // Save current TF dates before switching
+  const fromEl = document.getElementById('ap-date-from');
+  const toEl = document.getElementById('ap-date-to');
+  if (fromEl && toEl && _alertPhase.tf) {
+    if (!_alertPhase.dates[_alertPhase.tf]) _alertPhase.dates[_alertPhase.tf] = {};
+    _alertPhase.dates[_alertPhase.tf].from = fromEl.value;
+    _alertPhase.dates[_alertPhase.tf].to = toEl.value;
+  }
   _alertPhase.tf = tf;
   const tfColors = { '4H':'255,190,80', '1D':'255,140,40', '1W':'200,90,0', '1M':'160,70,0' };
   document.querySelectorAll('#ap-tf-row .ap-tf-btn').forEach(b => {
@@ -12497,6 +12511,12 @@ function alertPageTF(tf) {
   const dir = _alertPhase.phases[tf] || 'down';
   _alertPhase.dir = dir;
   alertPagePhase(dir, true);
+  // Restore dates for this TF
+  const d = (_alertPhase.dates && _alertPhase.dates[tf]) || { from:'', to:'' };
+  if (fromEl) fromEl.value = d.from || '';
+  if (toEl) toEl.value = d.to || '';
+  _alertPhase.from = d.from || '';
+  _alertPhase.to = d.to || '';
   alertPageSave();
   alertsPageRender();
 }
@@ -12504,6 +12524,10 @@ function alertPageTF(tf) {
 function alertPageSave() {
   _alertPhase.from = document.getElementById('ap-date-from').value;
   _alertPhase.to = document.getElementById('ap-date-to').value;
+  // Save dates per TF
+  if (!_alertPhase.dates[_alertPhase.tf]) _alertPhase.dates[_alertPhase.tf] = {};
+  _alertPhase.dates[_alertPhase.tf].from = _alertPhase.from;
+  _alertPhase.dates[_alertPhase.tf].to = _alertPhase.to;
   localStorage.setItem('elcaro_alert_phase', JSON.stringify(_alertPhase));
 }
 
