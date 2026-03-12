@@ -12249,7 +12249,7 @@ function alertSelectAsset(btn, asset) {
 
 function alertSelectTF(btn, tf) {
   _alertPhase.tf = tf;
-  const tfColors = { '4H':'255,190,80', '1D':'255,140,40', '1W':'200,90,0' };
+  const tfColors = { '4H':'255,190,80', '1D':'255,140,40', '1W':'200,90,0', '1M':'160,70,0' };
   document.querySelectorAll('#alert-tf-row .alert-tf-btn').forEach(b => {
     b.classList.remove('active');
     b.style.background = '#111'; b.style.borderColor = '#252525'; b.style.color = '#666';
@@ -12428,7 +12428,7 @@ function alertsPageInit() {
   if (ph.from) document.getElementById('ap-date-from').value = ph.from;
   if (ph.to) document.getElementById('ap-date-to').value = ph.to;
   alertPagePhase(ph.dir, true);
-  alertsPageRender();
+  alertPageTF(ph.tf || '4H');
 }
 
 function alertPagePhase(dir, noSave) {
@@ -12451,6 +12451,23 @@ function alertPagePhase(dir, noSave) {
     badge.style.borderColor = dir === 'up' ? 'rgba(0,200,150,.3)' : 'rgba(255,59,92,.3)';
   }
   if (!noSave) { alertPageSave(); alertsPageRender(); }
+}
+
+function alertPageTF(tf) {
+  _alertPhase.tf = tf;
+  const tfColors = { '4H':'255,190,80', '1D':'255,140,40', '1W':'200,90,0', '1M':'160,70,0' };
+  document.querySelectorAll('#ap-tf-row .ap-tf-btn').forEach(b => {
+    b.style.background = '#111'; b.style.borderColor = '#252525'; b.style.color = '#666';
+  });
+  const btns = document.querySelectorAll('#ap-tf-row .ap-tf-btn');
+  btns.forEach(b => {
+    if (b.textContent.trim() === tf) {
+      const c = tfColors[tf] || '255,140,40';
+      b.style.background = `rgba(${c},.15)`; b.style.borderColor = `rgba(${c},.4)`; b.style.color = `rgb(${c})`;
+    }
+  });
+  alertPageSave();
+  alertsPageRender();
 }
 
 function alertPageSave() {
@@ -16653,7 +16670,12 @@ function pnlDeleteTrade(id) {
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <div style="background:rgba(247,147,26,.15);border:1px solid rgba(247,147,26,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#f7931a;font-family:'Space Mono',monospace;">₿ BTC</div>
-      <div id="alerts-page-tf" style="background:rgba(255,190,80,.12);border:1px solid rgba(255,190,80,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:rgb(255,190,80);font-family:'Space Mono',monospace;">4H</div>
+      <div style="display:flex;gap:4px;" id="ap-tf-row">
+        <button onclick="alertPageTF('4H')" class="ap-tf-btn" style="background:rgba(255,190,80,.15);border:1px solid rgba(255,190,80,.4);border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:rgb(255,190,80);cursor:pointer;font-family:'Space Mono',monospace;">4H</button>
+        <button onclick="alertPageTF('1D')" class="ap-tf-btn" style="background:#111;border:1px solid #252525;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1D</button>
+        <button onclick="alertPageTF('1W')" class="ap-tf-btn" style="background:#111;border:1px solid #252525;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1W</button>
+        <button onclick="alertPageTF('1M')" class="ap-tf-btn" style="background:#111;border:1px solid #252525;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1M</button>
+      </div>
       <div id="alerts-page-phase" style="background:rgba(255,59,92,.12);border:1px solid rgba(255,59,92,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--red);font-family:'Space Mono',monospace;">↓ DESCENDING</div>
       <div style="flex:1;"></div>
       <div id="alerts-page-count" style="font-size:10px;color:#444;font-family:'Space Mono',monospace;">0</div>
