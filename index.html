@@ -12477,20 +12477,20 @@ function alertPagePhase(dir, noSave) {
 
 function alertUpdateMarketBadge() {
   const badge = document.getElementById('alerts-market-badge');
-  if (!badge) return;
+  const emoji = document.getElementById('alerts-market-emoji');
+  const label = document.getElementById('alerts-market-label');
+  if (!badge || !emoji || !label) return;
   const w = _alertPhase.phases['1W'] || 'down';
   if (w === 'up') {
-    badge.textContent = '🐂 BULL MARKET';
-    badge.style.color = 'var(--green)';
-    badge.style.background = 'rgba(0,200,150,.1)';
-    badge.style.borderColor = 'rgba(0,200,150,.25)';
+    emoji.textContent = '🐂';
+    label.textContent = 'BULL MARKET';
+    label.style.color = 'var(--green)';
   } else {
-    badge.textContent = '🐻 BEAR MARKET';
-    badge.style.color = 'var(--red)';
-    badge.style.background = 'rgba(255,59,92,.1)';
-    badge.style.borderColor = 'rgba(255,59,92,.25)';
+    emoji.textContent = '🐻';
+    label.textContent = 'BEAR MARKET';
+    label.style.color = 'var(--red)';
   }
-  badge.style.display = 'inline-block';
+  badge.style.display = 'block';
 }
 
 function alertPageTF(tf) {
@@ -16714,12 +16714,13 @@ function pnlDeleteTrade(id) {
     <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(255,190,80,.08) 0%,transparent 70%);"></div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
       <div style="font-size:28px;">📡</div>
-      <div>
+      <div style="flex:1;">
         <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:900;color:#ff6a00;letter-spacing:1px;">TRADING FILTER ALERTS</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-          <span style="font-size:9px;color:#555;font-family:'Space Mono',monospace;">VOL · DIV · MTF — LIVE SIGNALS</span>
-          <span id="alerts-market-badge" style="display:none;border:1px solid rgba(255,59,92,.25);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:800;font-family:'Space Mono',monospace;white-space:nowrap;"></span>
-        </div>
+        <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-top:3px;">VOL · DIV · MTF — LIVE SIGNALS</div>
+      </div>
+      <div id="alerts-market-badge" style="display:none;text-align:center;min-width:52px;">
+        <div id="alerts-market-emoji" style="font-size:28px;line-height:1;"></div>
+        <div id="alerts-market-label" style="font-size:8px;font-weight:900;letter-spacing:1px;font-family:'Space Mono',monospace;margin-top:2px;white-space:nowrap;"></div>
       </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
