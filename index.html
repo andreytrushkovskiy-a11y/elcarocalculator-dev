@@ -48,6 +48,8 @@
   --cyan:   #00e5ff;
   --card:   #131313;
   --card2:  #1c1c1c;
+  --profit: #22c55e;
+  --loss:   #ef4444;
   --gold:   #ffd700;
   --gold2:  #ffb300;
   --silver2:#b8b8b8;
@@ -4214,7 +4216,7 @@ input[type=range]::-webkit-slider-thumb {
           </div>
           <div class="edit-field">
             <div class="edit-label">PUT PRICE</div>
-            <input type="number" class="edit-input" id="inp-put" placeholder="2885" step="1" min="0" oninput="liveCalc()">
+            <input type="number" class="edit-input" id="inp-put" placeholder="2885" step="1" min="0" oninput="liveCalc()" onkeydown="if(event.key==='Enter')calculate()">
           </div>
         </div>
         <div id="straddle-preview" style="display:none;" class="straddle-preview">
@@ -5329,13 +5331,13 @@ input[type=range]::-webkit-slider-thumb {
         <div style="font-size:8px;font-weight:700;color:var(--text2);margin-bottom:5px;">BUY PRICE $</div>
         <div style="display:flex;gap:4px;">
           <input class="pf-add-input" id="pf-add-price" placeholder="66,000" type="number" style="flex:1;" oninput="pfSyncUsd();pfSyncQty();">
-          <button class="pf-fetch-price-btn" onclick="pfFetchAddPrice()" title="Get live price">⟳</button>
+          <button class="pf-fetch-price-btn" onclick="pfFetchAddPrice(this)" title="Get live price">⟳</button>
         </div>
       </div>
       <div>
         <div style="font-size:8px;font-weight:700;color:var(--text2);margin-bottom:5px;">QUANTITY</div>
         <input class="pf-add-input" id="pf-add-qty" placeholder="0.5" type="number" step="any"
-          oninput="pfSyncUsd()">
+          oninput="pfSyncUsd()" onkeydown="if(event.key==='Enter')pfAddAsset()">
       </div>
       <div>
         <div style="font-size:8px;font-weight:700;color:var(--text2);margin-bottom:5px;">VOLUME USD $</div>
@@ -8351,31 +8353,34 @@ async function pfGetLivePrice(sym) {
   try {
     if (geckoId) {
       const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${geckoId}&vs_currencies=usd`);
+      if (!r.ok) throw new Error('CoinGecko ' + r.status);
       const d = await r.json();
       const price = d[geckoId]?.usd;
       if (price) { pfLivePrices[sym] = {price, ts:Date.now()}; return price; }
     }
     // Search CoinGecko
     const sr = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(sym)}`);
+    if (!sr.ok) throw new Error('CoinGecko search ' + sr.status);
     const sd = await sr.json();
     const match = sd.coins?.find(c => c.symbol.toUpperCase() === sym.toUpperCase());
     if (match) {
       const r2 = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${match.id}&vs_currencies=usd`);
+      if (!r2.ok) throw new Error('CoinGecko ' + r2.status);
       const d2 = await r2.json();
       const price = d2[match.id]?.usd;
       if (price) { pfLivePrices[sym] = {price, ts:Date.now()}; return price; }
     }
-  } catch(e) {}
+  } catch(e) { console.warn('pfGetLivePrice', sym, e); }
   return null;
 }
 
-async function pfFetchAddPrice() {
+async function pfFetchAddPrice(el) {
   const sym = document.getElementById('pf-add-sym').value.trim().toUpperCase();
   if (!sym) { showToast('⚠ Enter a ticker first'); return; }
-  const btn = event.target;
-  btn.textContent = '…';
+  const btn = el instanceof HTMLElement ? el : document.querySelector('[onclick*="pfFetchAddPrice"]');
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
   const price = await pfGetLivePrice(sym);
-  btn.textContent = '⟳';
+  if (btn) { btn.textContent = '⟳'; btn.disabled = false; }
   if (price) {
     document.getElementById('pf-add-price').value = price;
     showToast('✓ ' + sym + ' · ' + fmtAvgPrice(price));
@@ -8408,9 +8413,9 @@ function pfAddAsset() {
   const typeEl= document.getElementById('pf-add-type').value;
   const fb    = document.getElementById('pf-add-feedback');
 
-  if (!sym)   { fb.style.color='#ef4444'; fb.textContent='⚠ Enter ticker symbol'; return; }
-  if (!price) { fb.style.color='#ef4444'; fb.textContent='⚠ Enter buy price'; return; }
-  if (!qty)   { fb.style.color='#ef4444'; fb.textContent='⚠ Enter quantity'; return; }
+  if (!sym)      { fb.style.color='var(--red,#ef4444)'; fb.textContent='⚠ Enter ticker symbol'; return; }
+  if (price <= 0){ fb.style.color='var(--red,#ef4444)'; fb.textContent='⚠ Enter valid buy price'; return; }
+  if (qty <= 0)  { fb.style.color='var(--red,#ef4444)'; fb.textContent='⚠ Enter valid quantity'; return; }
 
   const type  = typeEl === 'auto' ? pfDetectType(sym) : typeEl;
   const existing = pfAssets.find(a => a.sym === sym);
@@ -8422,11 +8427,11 @@ function pfAddAsset() {
     existing.qty      = newTotalQty;
     existing.avgPrice = newAvgPrice;
     existing.entries  = (existing.entries || 1) + 1;
-    fb.style.color = '#22c55e';
+    fb.style.color = 'var(--profit,#22c55e)';
     fb.textContent = '✓ ' + sym + ' averaged — new avg: ' + fmtAvgPrice(newAvgPrice) + ' · qty: ' + newTotalQty.toLocaleString('en',{maximumFractionDigits:6});
   } else {
     pfAssets.push({ sym, avgPrice: price, qty, type, entries:1, addedAt: Date.now() });
-    fb.style.color = '#22c55e';
+    fb.style.color = 'var(--profit,#22c55e)';
     fb.textContent = '✓ ' + sym + ' added — ' + qty + ' @ ' + fmtAvgPrice(price);
   }
 
@@ -8438,7 +8443,6 @@ function pfAddAsset() {
   document.getElementById('pf-add-price').value = '';
   document.getElementById('pf-add-qty').value   = '';
   const usdCl = document.getElementById('pf-add-usd'); if (usdCl) usdCl.value = '';
-  document.getElementById('pf-add-usd').value   = '';
   setTimeout(() => { fb.textContent = ''; }, 4000);
 }
 
@@ -8453,8 +8457,11 @@ async function pfRefreshPrices() {
   if (!pfAssets.length) return;
   showToast('⟳ Fetching live prices…');
   const results = await Promise.allSettled(pfAssets.map(a => pfGetLivePrice(a.sym)));
+  const ok = results.filter(r => r.status === 'fulfilled' && r.value).length;
   pfRenderAll();
-  showToast('✓ Prices updated');
+  if (ok === pfAssets.length) showToast('✓ All ' + ok + ' prices updated');
+  else if (ok > 0) showToast('⚠ ' + ok + '/' + pfAssets.length + ' prices updated');
+  else showToast('⚠ Failed to fetch prices');
 }
 
 // ── Master render ──
@@ -8482,10 +8489,10 @@ function pfRenderAll() {
   document.getElementById('pf-cur-val').textContent   = '$' + totalCurrent.toLocaleString('en',{maximumFractionDigits:0});
   const pnlEl = document.getElementById('pf-pnl-usd');
   pnlEl.textContent  = (totalPnl>=0?'+':'')+  '$' + Math.abs(totalPnl).toLocaleString('en',{maximumFractionDigits:0});
-  pnlEl.style.color  = totalPnl >= 0 ? '#22c55e' : '#ef4444';
+  pnlEl.style.color  = totalPnl >= 0 ? 'var(--profit,#22c55e)' : 'var(--loss,#ef4444)';
   const pnlPctEl = document.getElementById('pf-pnl-pct');
   pnlPctEl.textContent = (totalPnlPct>=0?'+':'') + totalPnlPct.toFixed(2) + '%';
-  pnlPctEl.style.color = totalPnl >= 0 ? '#22c55e' : '#ef4444';
+  pnlPctEl.style.color = totalPnl >= 0 ? 'var(--profit,#22c55e)' : 'var(--loss,#ef4444)';
   document.getElementById('pf-asset-count').textContent = pfAssets.length;
 
   // Type breakdown
@@ -12329,7 +12336,7 @@ function oracleRenderAll() {
   oracleRenderTab('vault');
 }
 function oracleRenderTab(name) {
-  if (name==='vault')       { oracleRenderVault(); opRenderVault(); }
+  if (name==='vault')       { oracleRenderVault(); }
   if (name==='quests')      { opRenderQuests(); }
   if (name==='prophecies')  { opRenderArenaDuels(); renderOracleCallsBets(); renderArenaMkt(); }
   if (name==='guild')       { opRenderGuild(); }
@@ -12716,7 +12723,6 @@ function orcOpenChest() {
   }
   showToast(`📦 ${d.icon} Chest opened! ${count} forecast${count>1?'s':''} + ${bonus}⬡ received!`);
 }
-function orcSellChest() { orcToggleSellOptions(); } // legacy — now just toggles
 
 function orcToggleSellOptions() {
   const opts = document.getElementById('op-cm-sell-options');
@@ -13439,21 +13445,9 @@ function opClaimQuest(qid) {
   opRenderQuests();
 }
 
-// ── Update coin display in oracle panel (legacy stub) ──
-// opUpdateCoins removed — use oracleRenderVaultCoins() directly
-
-// ══════════════════════════
-//  VAULT
-// ══════════════════════════
-function opRenderVault() {
-  opRenderVaultCoins2();
-}
-function opRenderVaultCoins2() {
-  // coins displayed in header via OC system — no separate op-coin-val needed
-}
+// Vault coins displayed in header via OC system — no separate render needed
 
 // ── Check-in (legacy stub — real logic in oracleCheckin) ──
-// opDoCheckin/opOpenSpin removed — use oracleCheckin()/openSpin() directly
 //  QUESTS + BATTLE PASS
 // ══════════════════════════
 function opRenderQuests() {
@@ -13894,7 +13888,6 @@ function guildOpenTreasury() {
   guildOpenModal('guild-treasury-modal');
 }
 
-function openGuildTreasury() { guildOpenTreasury(); }  // legacy alias
 
 function claimTreasury() {
   // Give user their share
@@ -14375,7 +14368,15 @@ function switchOmTab(el, tab) {
 }
 
 // Close on Escape
-// Escape key removed (oracle is now inline section)
+// Close modals on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  ['op-chest-modal','pnl-add-modal','guild-rules-modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.style.display !== 'none') el.style.display = 'none';
+  });
+});
 </script>
 
 <!-- ══ GUILD CONTRIB MODAL ══ -->
@@ -14896,7 +14897,6 @@ function _showRevealedCard(d) {
   if (card) { card.style.borderColor = d.asset?'rgba(0,230,118,.2)':'rgba(255,255,255,.05)'; card.style.background = d.asset?'rgba(0,230,118,.06)':'rgba(255,255,255,.02)'; }
 }
 
-// showTraderRevealed removed — use _showRevealedCard(d) directly
 function followTraderAction() {
   const trader = OC_EXT.currentTraderModal;
   if (!trader) return;
@@ -14920,7 +14920,6 @@ function followTraderAction() {
   showToast('🔔 Now mirroring @'+trader+'! You\'ll see their moves in guild chat.');
   renderTradersList();
 }
-// subscribeTrader alias removed — use traderSubscribe() directly
 
 // ── STREAK INSURANCE ──────────────────────────────
 function buyStreakInsurance() {
