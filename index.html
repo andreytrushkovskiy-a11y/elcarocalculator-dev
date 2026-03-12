@@ -4074,32 +4074,7 @@ input[type=range]::-webkit-slider-thumb {
 </head>
 <body>
 
-<!-- AUTH GATE -->
-<div id="auth-gate" style="display:none;position:fixed;inset:0;z-index:99999;background:#080808;color:#f0f0f0;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;">
-  <div>
-    <div style="font-size:48px;margin-bottom:20px;">🔒</div>
-    <div style="font-size:22px;font-weight:700;margin-bottom:12px;">Access Denied</div>
-    <div style="color:#555;font-size:14px;line-height:1.6;">This app is available only through<br><b style="color:#ff6a00;">@elcarocalculator_bot</b> on Telegram</div>
-  </div>
-</div>
-<script>
-(function() {
-  var attempts = 0;
-  function checkAuth() {
-    var tg = window.Telegram && window.Telegram.WebApp;
-    var initData = tg && tg.initData;
-    if (initData && initData.length >= 10) return;
-    attempts++;
-    if (attempts < 10) { setTimeout(checkAuth, 200); return; }
-    var gate = document.getElementById('auth-gate');
-    if (gate) gate.style.display = 'flex';
-    document.querySelectorAll('body > *:not(#auth-gate):not(script)').forEach(function(el) {
-      el.style.display = 'none';
-    });
-  }
-  checkAuth();
-})();
-</script>
+<!-- AUTH GATE (disabled — bot whitelist handles access control) -->
 
 <!-- HEADER -->
 <div class="header" style="justify-content:space-between;">
