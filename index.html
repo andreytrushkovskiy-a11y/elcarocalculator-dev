@@ -6784,9 +6784,9 @@ function addHistory(entry) {
     const beRow = `<div class="hist-row">
       <span class="hist-row-lbl" style="color:var(--green);font-size:8px;">BE</span>
       <span class="hist-row-range">
-        <span style="color:var(--red)">${fmtPrice(h.be_lo)}</span>
+        <span style="color:#eee">${fmtPrice(h.be_lo)}</span>
         <span style="color:var(--text2)"> — </span>
-        <span style="color:var(--green)">${fmtPrice(h.be_hi)}</span>
+        <span style="color:#eee">${fmtPrice(h.be_hi)}</span>
       </span>
       <span class="hist-row-prob">breakeven</span>
     </div>`;
@@ -6794,9 +6794,9 @@ function addHistory(entry) {
       <div class="hist-row">
         <span class="hist-row-lbl" style="color:${sigmaColors[l.k]}">${l.k}σ</span>
         <span class="hist-row-range">
-          <span style="color:var(--red)">${fmtPrice(l.lo)}</span>
+          <span style="color:#eee">${fmtPrice(l.lo)}</span>
           <span style="color:var(--text2)"> — </span>
-          <span style="color:var(--green)">${fmtPrice(l.hi)}</span>
+          <span style="color:#eee">${fmtPrice(l.hi)}</span>
         </span>
         <span class="hist-row-prob">${l.prob}</span>
       </div>`).join('');
