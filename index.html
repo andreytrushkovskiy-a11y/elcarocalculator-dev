@@ -4167,11 +4167,6 @@ input[type=range]::-webkit-slider-thumb {
       👁 ELCARO
     </button>
 
-    <button class="mode-btn" id="mode-guild-nav" onclick="setMode('guild')"
-      title="Guild" style="flex:1;min-width:0;color:#00e676;">
-      🛡️ GUILD
-    </button>
-
     <!-- Divider -->
     <div style="width:1px;background:#1e1e1e;margin:6px 2px;flex-shrink:0;"></div>
 
@@ -7357,8 +7352,7 @@ function setMode(mode) {
   _active('mode-straddle',     mode === 'straddle');
   _active('mode-tools-group',  isToolsMode);
   _active('mode-market-group', isMarketMode);
-  _active('mode-guild-nav',    mode === 'guild');
-  _active('mode-elcaro-nav',   mode === 'elcaro');
+  _active('mode-elcaro-nav',   mode === 'elcaro' || mode === 'guild');
   // PNL nav button moved to tools grid
 
   // Show/hide helpers
@@ -7372,7 +7366,7 @@ function setMode(mode) {
     'geo-section','gpr-section','econ-section','ai-settings-section',
     'portfolio-section','agent-section',
     'chart-section','heatmap-stock-section','heatmap-crypto-section',
-    'calendar-section','news-section','guild-section','elcaro-section',
+    'calendar-section','news-section','elcaro-section',
     'pnl-section','exchange-section','alerts-section'
   ];
   allSections.forEach(hide);
@@ -7403,7 +7397,6 @@ function setMode(mode) {
     'heatmap-crypto':'heatmap-crypto-section',
     calendar:        'calendar-section',
     news:            'news-section',
-    guild:           'guild-section',
     elcaro:          'elcaro-section',
     pnl:             'pnl-section',
     exchange:        'exchange-section',
@@ -7432,6 +7425,7 @@ function setMode(mode) {
   if (mode === 'agent') { agentInitialized = false; agentInit(); }
   if (mode === 'exchange') exInit();
   if (mode === 'alerts') alertsPageInit();
+  if (mode === 'guild') { oracleOpenOnTab('guild'); return; }
 }
 
 // ── Sync qty ↔ vol for leg 1 ──
@@ -10994,6 +10988,9 @@ function initSigmaButtons() {
       </div>
       <div class="op-tab" onclick="oracleTab('profile',this)">
         <span class="op-tab-icon">👤</span>PROFILE
+      </div>
+      <div class="op-tab" onclick="oracleTab('guild',this)">
+        <span class="op-tab-icon">🛡️</span>GUILD
       </div>
     </div>
 
