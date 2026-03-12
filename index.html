@@ -4062,6 +4062,41 @@ input[type=range]::-webkit-slider-thumb {
 .pf-hero-bar-fill { background:linear-gradient(90deg,#ff6500,#f5a623) !important; }
 /* ─── END ─── */
 
+/* ══ EXCHANGE / BLOFIN ══ */
+.ex-tab-row { display:flex; gap:4px; margin-bottom:14px; }
+.ex-tab { flex:1; padding:8px 0; border-radius:8px; border:1px solid var(--border2); background:var(--bg);
+  font-size:10px; font-weight:700; text-align:center; color:var(--text2); cursor:pointer; font-family:'Space Mono',monospace; letter-spacing:.5px; transition:all .15s; }
+.ex-tab.active { border-color:#00c8ff; color:#00c8ff; background:rgba(0,200,255,.06); }
+.ex-status { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:9px; font-weight:700; font-family:'Space Mono',monospace; letter-spacing:.5px; }
+.ex-status.connected { background:rgba(34,197,94,.1); color:var(--profit); border:1px solid rgba(34,197,94,.25); }
+.ex-status.disconnected { background:rgba(255,59,92,.08); color:var(--loss); border:1px solid rgba(255,59,92,.2); }
+.ex-status.verified { background:rgba(0,200,255,.1); color:#00c8ff; border:1px solid rgba(0,200,255,.25); }
+.ex-input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border2); background:var(--bg);
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; outline:none; box-sizing:border-box; }
+.ex-input:focus { border-color:#00c8ff; }
+.ex-input::placeholder { color:#333; }
+.ex-btn { padding:10px 20px; border-radius:10px; border:none; font-weight:800; font-size:11px; cursor:pointer; font-family:inherit; letter-spacing:.5px; transition:all .15s; }
+.ex-btn-primary { background:linear-gradient(135deg,#00c8ff,#0090ff); color:#000; }
+.ex-btn-danger { background:rgba(255,59,92,.15); color:var(--loss); border:1px solid rgba(255,59,92,.2); }
+.ex-btn:hover { transform:translateY(-1px); }
+.ex-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+.ex-pos-row { padding:12px; border:1px solid var(--border2); border-radius:10px; background:var(--bg); margin-bottom:8px; }
+.ex-pos-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.ex-pos-sym { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:900; }
+.ex-pos-side { font-size:9px; font-weight:800; padding:2px 8px; border-radius:4px; letter-spacing:.5px; }
+.ex-pos-side.long { background:rgba(34,197,94,.12); color:var(--profit); }
+.ex-pos-side.short { background:rgba(255,59,92,.12); color:var(--loss); }
+.ex-pos-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.ex-pos-cell { text-align:center; }
+.ex-pos-cell-lbl { font-size:7px; color:var(--text2); font-weight:700; letter-spacing:.5px; margin-bottom:2px; }
+.ex-pos-cell-val { font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+.ex-order-side { display:flex; gap:4px; margin-bottom:12px; }
+.ex-order-side-btn { flex:1; padding:10px; border-radius:8px; border:2px solid var(--border2); background:none; font-weight:800; font-size:12px; cursor:pointer; transition:all .15s; }
+.ex-order-side-btn.buy { color:var(--profit); }
+.ex-order-side-btn.buy.active { border-color:var(--profit); background:rgba(34,197,94,.08); }
+.ex-order-side-btn.sell { color:var(--loss); }
+.ex-order-side-btn.sell.active { border-color:var(--loss); background:rgba(255,59,92,.08); }
+
 /* ── SECTION SLIDE-IN ANIMATION ── */
 .section-enter {
   animation: sectionSlideIn .28s cubic-bezier(.34,1.2,.64,1) both;
@@ -4509,6 +4544,12 @@ input[type=range]::-webkit-slider-thumb {
       <div class="tlb-icon" style="font-size:28px;">💲</div>
       <div class="tlb-name" style="color:#22c55e;">PNL</div>
       <div class="tlb-sub">Trade Tracker</div>
+    </div>
+
+    <div onclick="setMode('exchange')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(0,200,255,.07),rgba(0,200,255,.03));border:1px solid rgba(0,200,255,.2);">
+      <div class="tlb-icon" style="font-size:28px;">🏦</div>
+      <div class="tlb-name" style="color:#00c8ff;">EXCHANGE</div>
+      <div class="tlb-sub">BloFin Trading</div>
     </div>
 
   </div>
@@ -7292,7 +7333,7 @@ let avgLegCount = 0;
 let avgLastResult = null;
 
 function setMode(mode) {
-  const toolsModes   = ['tools','portfolio','agent','avg','sizer','funding','fgi','geo','gpr','econ','ai-settings'];
+  const toolsModes   = ['tools','portfolio','agent','avg','sizer','funding','fgi','geo','gpr','econ','ai-settings','exchange'];
   const marketModes  = ['market','chart','heatmap-stock','heatmap-crypto','calendar','news'];
   const isPnlMode    = mode === 'pnl';
   const isToolsMode  = toolsModes.includes(mode);
@@ -7319,7 +7360,7 @@ function setMode(mode) {
     'portfolio-section','agent-section',
     'chart-section','heatmap-stock-section','heatmap-crypto-section',
     'calendar-section','news-section','guild-section','elcaro-section',
-    'pnl-section'
+    'pnl-section','exchange-section'
   ];
   allSections.forEach(hide);
 
@@ -7352,6 +7393,7 @@ function setMode(mode) {
     guild:           'guild-section',
     elcaro:          'elcaro-section',
     pnl:             'pnl-section',
+    exchange:        'exchange-section',
   };
   if (sectionMap[mode]) {
     const secEl = document.getElementById(sectionMap[mode]);
@@ -7374,6 +7416,7 @@ function setMode(mode) {
   if (mode === 'portfolio') pfRenderAll();
   if (mode === 'pnl') pnlRenderAll();
   if (mode === 'agent') { agentInitialized = false; agentInit(); }
+  if (mode === 'exchange') exInit();
 }
 
 // ── Sync qty ↔ vol for leg 1 ──
@@ -13758,6 +13801,487 @@ function arenaBuyChest(id, chestType) {
   showToast(icons[chestType]+' '+chestType.charAt(0).toUpperCase()+chestType.slice(1)+' Chest added to inventory!');
 }
 
+/* ══════════════════════════════════════════════
+   EXCHANGE / BLOFIN INTEGRATION
+═══════════════════════════════════════════════ */
+const EX_STORAGE_KEY = 'elcaro_ex_config';
+const EX_PROXY_URL = 'https://elcaro-blofin-proxy.elcaro-alerts.workers.dev';
+let _exConnected = false;
+let _exVerified  = false;
+let _exMarket    = 'futures';  // 'futures' | 'spot'
+let _exSide      = 'buy';
+let _exOrderType = 'market';
+let _exConfig    = {};
+
+function exInit() {
+  exLoadConfig();
+  exUpdateUI();
+}
+
+function exLoadConfig() {
+  try {
+    const raw = localStorage.getItem(EX_STORAGE_KEY);
+    if (raw) _exConfig = JSON.parse(raw);
+  } catch(e) {}
+  if (_exConfig.apiKey) {
+    _exConnected = true;
+  }
+  if (_exConfig.verified) {
+    _exVerified = true;
+  }
+}
+
+function exSaveConfig() {
+  try { localStorage.setItem(EX_STORAGE_KEY, JSON.stringify(_exConfig)); } catch(e) {}
+}
+
+function exSetTab(tab) {
+  ['connect','account','trade','positions'].forEach(t => {
+    const panel = document.getElementById('ex-panel-' + t);
+    const tabEl = document.getElementById('ex-tab-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    if (tabEl) tabEl.classList.toggle('active', t === tab);
+  });
+  if (tab === 'account' && _exConnected) exLoadAccount();
+  if (tab === 'positions' && _exConnected) exLoadPositions();
+}
+
+function exUpdateUI() {
+  const statusEl = document.getElementById('ex-conn-status');
+  const connectBtn = document.getElementById('ex-connect-btn');
+  const disconnectBtn = document.getElementById('ex-disconnect-btn');
+  const submitBtn = document.getElementById('ex-submit-btn');
+  const verifyStatus = document.getElementById('ex-verify-status');
+
+  if (statusEl) {
+    if (_exConnected && _exVerified) {
+      statusEl.className = 'ex-status verified';
+      statusEl.textContent = '● VERIFIED';
+    } else if (_exConnected) {
+      statusEl.className = 'ex-status connected';
+      statusEl.textContent = '● CONNECTED';
+    } else {
+      statusEl.className = 'ex-status disconnected';
+      statusEl.textContent = '● DISCONNECTED';
+    }
+  }
+
+  if (connectBtn) connectBtn.style.display = _exConnected ? 'none' : 'block';
+  if (disconnectBtn) disconnectBtn.style.display = _exConnected ? 'block' : 'none';
+
+  if (submitBtn) {
+    if (!_exConnected) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '🔗 CONNECT API FIRST';
+    } else {
+      submitBtn.disabled = false;
+      const side = _exSide === 'buy' ? '▲ BUY' : '▼ SELL';
+      submitBtn.textContent = side + ' · PLACE ORDER';
+      submitBtn.style.background = _exSide === 'buy'
+        ? 'linear-gradient(135deg,var(--profit),#00c896)'
+        : 'linear-gradient(135deg,var(--loss),#ff3b5c)';
+    }
+  }
+
+  if (verifyStatus && _exVerified) {
+    verifyStatus.style.color = 'var(--profit)';
+    verifyStatus.textContent = '✓ Verified ELCARO referral · Full access granted';
+  }
+
+  // Pre-fill API key if saved
+  const keyInp = document.getElementById('ex-api-key');
+  if (keyInp && _exConfig.apiKey && !keyInp.value) {
+    keyInp.value = _exConfig.apiKey;
+    const secInp = document.getElementById('ex-api-secret');
+    if (secInp) secInp.value = '••••••••••••';
+    const passInp = document.getElementById('ex-api-pass');
+    if (passInp) passInp.value = '••••••••';
+    const demoInp = document.getElementById('ex-demo-mode');
+    if (demoInp) demoInp.checked = !!_exConfig.demo;
+  }
+
+  // Pre-fill UID
+  const uidInp = document.getElementById('ex-uid-input');
+  if (uidInp && _exConfig.uid && !uidInp.value) uidInp.value = _exConfig.uid;
+}
+
+function exConnect() {
+  const apiKey  = document.getElementById('ex-api-key').value.trim();
+  const secret  = document.getElementById('ex-api-secret').value.trim();
+  const pass    = document.getElementById('ex-api-pass').value.trim();
+  const demo    = document.getElementById('ex-demo-mode').checked;
+
+  if (!apiKey || !secret || !pass) { showToast('⚠ Fill all API fields'); return; }
+  if (secret === '••••••••••••') {
+    // Already connected with saved keys
+    _exConnected = true;
+    exUpdateUI();
+    showToast('✓ Already connected');
+    return;
+  }
+
+  _exConfig.apiKey = apiKey;
+  _exConfig.apiSecret = secret;
+  _exConfig.passphrase = pass;
+  _exConfig.demo = demo;
+  _exConnected = true;
+  exSaveConfig();
+  exUpdateUI();
+  showToast('✓ BloFin API connected' + (demo ? ' (DEMO)' : ''));
+  exSetTab('account');
+}
+
+function exDisconnect() {
+  _exConfig = { uid: _exConfig.uid, verified: _exConfig.verified };
+  _exConnected = false;
+  exSaveConfig();
+  document.getElementById('ex-api-key').value = '';
+  document.getElementById('ex-api-secret').value = '';
+  document.getElementById('ex-api-pass').value = '';
+  exUpdateUI();
+  showToast('Disconnected from BloFin');
+}
+
+// ── HMAC-SHA256 signing (Web Crypto API) ──
+async function exSign(method, path, body) {
+  const ts = String(Date.now());
+  const nonce = crypto.randomUUID ? crypto.randomUUID().replace(/-/g,'').slice(0,32) : String(Math.random()).slice(2,18);
+  const bodyStr = body ? JSON.stringify(body) : '';
+  const prehash = path + method.toUpperCase() + ts + nonce + bodyStr;
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', encoder.encode(_exConfig.apiSecret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(prehash));
+
+  // Convert to hex then hex-bytes to base64
+  const hexStr = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2,'0')).join('');
+  const hexBytes = new Uint8Array(hexStr.match(/.{2}/g).map(h => parseInt(h,16)));
+  const b64 = btoa(String.fromCharCode(...hexBytes));
+
+  return {
+    'ACCESS-KEY': _exConfig.apiKey,
+    'ACCESS-SIGN': b64,
+    'ACCESS-TIMESTAMP': ts,
+    'ACCESS-NONCE': nonce,
+    'ACCESS-PASSPHRASE': _exConfig.passphrase,
+    'Content-Type': 'application/json'
+  };
+}
+
+// ── API call through CORS proxy ──
+async function exApi(method, path, body) {
+  if (!_exConnected || !_exConfig.apiKey) throw new Error('Not connected');
+  const headers = await exSign(method, path, body);
+  const baseUrl = _exConfig.demo
+    ? 'https://demo-trading-openapi.blofin.com'
+    : 'https://openapi.blofin.com';
+  const url = EX_PROXY_URL + '/proxy?url=' + encodeURIComponent(baseUrl + path);
+
+  const opts = { method, headers };
+  if (body && method !== 'GET') opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error('API ' + res.status);
+  return res.json();
+}
+
+// ── Verify referral ──
+async function exVerifyReferral() {
+  const uid = document.getElementById('ex-uid-input').value.trim();
+  if (!uid) { showToast('⚠ Enter your BloFin UID'); return; }
+  const btn = document.getElementById('ex-verify-btn');
+  const status = document.getElementById('ex-verify-status');
+  btn.disabled = true; btn.textContent = '…';
+
+  try {
+    const res = await fetch(EX_PROXY_URL + '/verify-referral?uid=' + encodeURIComponent(uid));
+    const data = await res.json();
+    if (data.verified) {
+      _exVerified = true;
+      _exConfig.uid = uid;
+      _exConfig.verified = true;
+      exSaveConfig();
+      status.style.color = 'var(--profit)';
+      status.textContent = '✓ Verified ELCARO referral · UID: ' + uid;
+      showToast('✓ Referral verified! Full access granted');
+    } else {
+      status.style.color = 'var(--loss)';
+      status.textContent = '✕ UID not found in ELCARO referrals. Sign up: blofin.com/register?referral=elcaro';
+    }
+  } catch(e) {
+    console.warn('exVerifyReferral', e);
+    status.style.color = 'var(--loss)';
+    status.textContent = '⚠ Verification service unavailable — try later';
+  }
+  btn.disabled = false; btn.textContent = 'VERIFY';
+  exUpdateUI();
+}
+
+// ── Account data ──
+async function exLoadAccount() {
+  if (!_exConnected) return;
+  const eqEl = document.getElementById('ex-equity');
+  const avEl = document.getElementById('ex-available');
+  const upEl = document.getElementById('ex-upnl');
+  const mrEl = document.getElementById('ex-margin');
+  const abEl = document.getElementById('ex-asset-balances');
+
+  if (eqEl) eqEl.textContent = '…';
+  try {
+    const data = await exApi('GET', '/api/v1/account/balance');
+    if (data.code === '0' && data.data && data.data.length) {
+      const acc = data.data[0];
+      const details = acc.details || [];
+      const totalEq = parseFloat(acc.totalEquity || 0);
+      const availBal = details.reduce((s, d) => s + parseFloat(d.availableBalance || 0), 0);
+      const upl = details.reduce((s, d) => s + parseFloat(d.unrealizedProfitLoss || 0), 0);
+      const margin = details.reduce((s, d) => s + parseFloat(d.frozenBalance || 0), 0);
+
+      if (eqEl) eqEl.textContent = '$' + totalEq.toLocaleString('en', {maximumFractionDigits:2});
+      if (avEl) avEl.textContent = '$' + availBal.toLocaleString('en', {maximumFractionDigits:2});
+      if (upEl) {
+        upEl.textContent = (upl >= 0 ? '+' : '') + '$' + Math.abs(upl).toLocaleString('en', {maximumFractionDigits:2});
+        upEl.style.color = upl >= 0 ? 'var(--profit)' : 'var(--loss)';
+      }
+      if (mrEl) mrEl.textContent = '$' + margin.toLocaleString('en', {maximumFractionDigits:2});
+
+      // Asset balances
+      if (abEl && details.length) {
+        abEl.innerHTML = details.filter(d => parseFloat(d.equity || 0) > 0).map(d => {
+          const eq = parseFloat(d.equity || 0);
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+            <span style="font-weight:800;font-family:'JetBrains Mono',monospace;">${d.currency || d.ccy}</span>
+            <span style="font-family:'JetBrains Mono',monospace;color:var(--text);">${eq.toLocaleString('en',{maximumFractionDigits:6})}</span>
+          </div>`;
+        }).join('');
+      }
+    } else {
+      throw new Error(data.msg || 'Unknown error');
+    }
+  } catch(e) {
+    console.warn('exLoadAccount', e);
+    if (eqEl) eqEl.textContent = '⚠';
+    if (avEl) avEl.textContent = '—';
+    showToast('⚠ ' + (e.message || 'Failed to load account'));
+  }
+}
+
+// ── Positions ──
+async function exLoadPositions() {
+  if (!_exConnected) return;
+  const listEl = document.getElementById('ex-positions-list');
+  const countEl = document.getElementById('ex-pos-count');
+  if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:14px;color:var(--text2);font-size:10px;">Loading…</div>';
+
+  try {
+    const data = await exApi('GET', '/api/v1/account/positions');
+    if (data.code === '0' && data.data) {
+      const positions = data.data.filter(p => parseFloat(p.positions || p.pos || 0) !== 0);
+      if (countEl) countEl.textContent = positions.length;
+
+      if (!positions.length) {
+        listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:10px;">No open positions</div>';
+        return;
+      }
+
+      listEl.innerHTML = positions.map(p => {
+        const sym = p.instId || p.instrumentId || '';
+        const side = parseFloat(p.positions || p.pos) > 0 ? 'long' : 'short';
+        const size = Math.abs(parseFloat(p.positions || p.pos));
+        const entry = parseFloat(p.averagePrice || p.avgPx || 0);
+        const mark = parseFloat(p.markPrice || p.markPx || 0);
+        const upl = parseFloat(p.unrealizedProfitLoss || p.upl || 0);
+        const lev = p.leverage || '—';
+        const liq = parseFloat(p.liquidationPrice || p.liqPx || 0);
+
+        return `<div class="ex-pos-row">
+          <div class="ex-pos-header">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="ex-pos-sym">${sym}</span>
+              <span class="ex-pos-side ${side}">${side.toUpperCase()} ${lev}×</span>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;color:${upl>=0?'var(--profit)':'var(--loss)'};">
+              ${upl>=0?'+':''}$${Math.abs(upl).toLocaleString('en',{maximumFractionDigits:2})}
+            </div>
+          </div>
+          <div class="ex-pos-grid">
+            <div class="ex-pos-cell"><div class="ex-pos-cell-lbl">SIZE</div><div class="ex-pos-cell-val">${size}</div></div>
+            <div class="ex-pos-cell"><div class="ex-pos-cell-lbl">ENTRY</div><div class="ex-pos-cell-val">${fmtPrice(entry)}</div></div>
+            <div class="ex-pos-cell"><div class="ex-pos-cell-lbl">MARK</div><div class="ex-pos-cell-val">${fmtPrice(mark)}</div></div>
+            <div class="ex-pos-cell"><div class="ex-pos-cell-lbl">LIQ. PRICE</div><div class="ex-pos-cell-val" style="color:var(--loss);">${liq > 0 ? fmtPrice(liq) : '—'}</div></div>
+            <div class="ex-pos-cell"><div class="ex-pos-cell-lbl">LEVERAGE</div><div class="ex-pos-cell-val">${lev}×</div></div>
+            <div class="ex-pos-cell">
+              <button onclick="exClosePosition('${sym}','${side}')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--loss);background:none;color:var(--loss);font-size:8px;font-weight:700;cursor:pointer;font-family:inherit;">CLOSE</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    console.warn('exLoadPositions', e);
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--loss);font-size:10px;">⚠ ' + (e.message||'Failed') + '</div>';
+  }
+}
+
+// ── Trade helpers ──
+function exSetMarket(m) {
+  _exMarket = m;
+  document.getElementById('ex-mkt-futures').classList.toggle('active', m === 'futures');
+  document.getElementById('ex-mkt-spot').classList.toggle('active', m === 'spot');
+  const levRow = document.getElementById('ex-leverage-row');
+  if (levRow) levRow.style.display = m === 'futures' ? 'block' : 'none';
+  // Update instrument placeholder
+  const symInp = document.getElementById('ex-trade-sym');
+  if (symInp && !symInp._userEdited) {
+    symInp.value = m === 'futures' ? 'BTC-USDT' : 'BTC-USDT';
+  }
+}
+
+function exSetSide(s) {
+  _exSide = s;
+  document.getElementById('ex-side-buy').classList.toggle('active', s === 'buy');
+  document.getElementById('ex-side-sell').classList.toggle('active', s === 'sell');
+  exUpdateUI();
+}
+
+function exSetOrderType(t) {
+  _exOrderType = t;
+  document.getElementById('ex-ot-market').classList.toggle('active', t === 'market');
+  document.getElementById('ex-ot-limit').classList.toggle('active', t === 'limit');
+  document.getElementById('ex-limit-price-row').style.display = t === 'limit' ? 'block' : 'none';
+}
+
+async function exFetchPrice() {
+  const sym = document.getElementById('ex-trade-sym').value.trim().toUpperCase();
+  if (!sym) return;
+  const btn = document.getElementById('ex-price-btn');
+  const el = document.getElementById('ex-live-price');
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const instId = sym.replace('-','-');
+    const res = await fetch(EX_PROXY_URL + '/proxy?url=' + encodeURIComponent(
+      'https://openapi.blofin.com/api/v1/market/ticker?instId=' + instId
+    ));
+    const data = await res.json();
+    if (data.code === '0' && data.data && data.data.length) {
+      const t = data.data[0];
+      const last = parseFloat(t.last || t.lastPrice || 0);
+      el.textContent = sym + ' · $' + last.toLocaleString('en',{maximumFractionDigits:2}) + ' · 24h: ' +
+        (parseFloat(t.changePercent24h || t.change24h || 0) >= 0 ? '+' : '') +
+        parseFloat(t.changePercent24h || t.change24h || 0).toFixed(2) + '%';
+      el.style.color = parseFloat(t.changePercent24h || t.change24h || 0) >= 0 ? 'var(--profit)' : 'var(--loss)';
+    } else {
+      el.textContent = '⚠ Ticker not found';
+      el.style.color = 'var(--loss)';
+    }
+  } catch(e) {
+    console.warn('exFetchPrice', e);
+    el.textContent = '⚠ Failed to fetch price';
+    el.style.color = 'var(--loss)';
+  }
+  btn.disabled = false; btn.textContent = 'PRICE';
+}
+
+// ── Place order ──
+async function exPlaceOrder() {
+  if (!_exConnected) { showToast('⚠ Connect API first'); return; }
+
+  const sym = document.getElementById('ex-trade-sym').value.trim().toUpperCase();
+  const size = document.getElementById('ex-trade-size').value.trim();
+  const lev = document.getElementById('ex-trade-leverage').value.trim();
+  const tp = document.getElementById('ex-trade-tp').value.trim();
+  const sl = document.getElementById('ex-trade-sl').value.trim();
+
+  if (!sym) { showToast('⚠ Enter instrument'); return; }
+  if (!size || parseFloat(size) <= 0) { showToast('⚠ Enter valid size'); return; }
+
+  const btn = document.getElementById('ex-submit-btn');
+  const side = _exSide === 'buy' ? 'buy' : 'sell';
+
+  // Confirmation
+  const sideLabel = side === 'buy' ? 'BUY/LONG' : 'SELL/SHORT';
+  const typeLabel = _exOrderType.toUpperCase();
+  let confirmMsg = `${sideLabel} ${size} ${sym}\nType: ${typeLabel}`;
+  if (_exMarket === 'futures') confirmMsg += `\nLeverage: ${lev}×`;
+  if (_exOrderType === 'limit') {
+    const price = document.getElementById('ex-trade-price').value.trim();
+    if (!price) { showToast('⚠ Enter limit price'); return; }
+    confirmMsg += `\nPrice: $${price}`;
+  }
+  if (tp) confirmMsg += `\nTP: $${tp}`;
+  if (sl) confirmMsg += `\nSL: $${sl}`;
+
+  if (!confirm('Place order?\n\n' + confirmMsg)) return;
+
+  btn.disabled = true; btn.textContent = '⏳ PLACING…';
+
+  try {
+    // Set leverage first (futures only)
+    if (_exMarket === 'futures' && lev) {
+      try {
+        await exApi('POST', '/api/v1/account/set-leverage', {
+          instId: sym, leverage: lev, marginMode: 'cross'
+        });
+      } catch(e) { console.warn('set leverage', e); }
+    }
+
+    const order = {
+      instId: sym,
+      marginMode: 'cross',
+      side: side,
+      orderType: _exOrderType,
+      size: size,
+    };
+
+    if (_exOrderType === 'limit') {
+      order.price = document.getElementById('ex-trade-price').value.trim();
+    }
+
+    // TPSL
+    if (tp) order.tpTriggerPrice = tp;
+    if (sl) order.slTriggerPrice = sl;
+
+    const path = _exMarket === 'futures'
+      ? '/api/v1/trade/order'
+      : '/api/v1/trade/order';
+
+    const data = await exApi('POST', path, order);
+
+    if (data.code === '0') {
+      showToast('✓ Order placed! ID: ' + (data.data?.[0]?.orderId || '—'));
+      exLoadPositions();
+      exLoadAccount();
+    } else {
+      showToast('⚠ ' + (data.msg || 'Order failed'));
+    }
+  } catch(e) {
+    console.warn('exPlaceOrder', e);
+    showToast('⚠ Order failed: ' + (e.message || 'Unknown error'));
+  }
+
+  btn.disabled = false;
+  exUpdateUI();
+}
+
+// ── Close position ──
+async function exClosePosition(instId, side) {
+  if (!confirm('Close ' + side.toUpperCase() + ' position on ' + instId + '?')) return;
+  try {
+    const closeSide = side === 'long' ? 'sell' : 'buy';
+    await exApi('POST', '/api/v1/trade/close-position', {
+      instId: instId, marginMode: 'cross'
+    });
+    showToast('✓ Position closed');
+    exLoadPositions();
+    exLoadAccount();
+  } catch(e) {
+    console.warn('exClosePosition', e);
+    showToast('⚠ Failed to close: ' + (e.message || ''));
+  }
+}
+
 // ══════════════════════════
 //  GUILD
 // ══════════════════════════
@@ -15502,6 +16026,216 @@ function pnlDeleteTrade(id) {
       <button onclick="pnlAddTrade()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#ff6500,#f5a623);border:none;color:#000;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;letter-spacing:1px;margin-top:4px;">ADD TRADE</button>
     </div>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     EXCHANGE / BLOFIN INTEGRATION
+══════════════════════════════════════════════ -->
+<div id="exchange-section" style="display:none;max-width:500px;margin:0 auto;padding:8px 4px 20px;">
+
+  <!-- HEADER -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1.8px;color:#888;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:8px;">
+        <span style="color:#00c8ff;font-size:14px;">🏦</span> BLOFIN EXCHANGE
+      </div>
+      <span id="ex-conn-status" class="ex-status disconnected">● DISCONNECTED</span>
+    </div>
+    <div class="ex-tab-row">
+      <div class="ex-tab active" id="ex-tab-connect" onclick="exSetTab('connect')">🔗 CONNECT</div>
+      <div class="ex-tab" id="ex-tab-account" onclick="exSetTab('account')">💰 ACCOUNT</div>
+      <div class="ex-tab" id="ex-tab-trade" onclick="exSetTab('trade')">⚡ TRADE</div>
+      <div class="ex-tab" id="ex-tab-positions" onclick="exSetTab('positions')">📊 POSITIONS</div>
+    </div>
+  </div>
+
+  <!-- TAB: CONNECT -->
+  <div id="ex-panel-connect" class="card" style="margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+      <span style="display:inline-block;width:3px;height:14px;background:#00c8ff;border-radius:2px;"></span>
+      API CONNECTION
+    </div>
+
+    <!-- Referral verification -->
+    <div style="background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.15);border-radius:10px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:9px;font-weight:800;color:#00c8ff;letter-spacing:1px;margin-bottom:8px;">REFERRAL VERIFICATION</div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:10px;">Enter your BloFin UID to verify referral access. ELCARO referrals get full exchange features.</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="ex-uid-input" class="ex-input" placeholder="Your BloFin UID" style="flex:1;">
+        <button onclick="exVerifyReferral()" class="ex-btn ex-btn-primary" id="ex-verify-btn">VERIFY</button>
+      </div>
+      <div id="ex-verify-status" style="font-size:9px;margin-top:8px;font-weight:700;"></div>
+    </div>
+
+    <!-- API Keys -->
+    <div id="ex-api-form">
+      <div style="display:grid;gap:10px;">
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">API KEY</div>
+          <input type="text" id="ex-api-key" class="ex-input" placeholder="Your BloFin API Key" autocomplete="off">
+        </div>
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">SECRET KEY</div>
+          <input type="password" id="ex-api-secret" class="ex-input" placeholder="Your Secret Key" autocomplete="off">
+        </div>
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">PASSPHRASE</div>
+          <input type="password" id="ex-api-pass" class="ex-input" placeholder="Your Passphrase" autocomplete="off">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+          <label style="font-size:9px;color:var(--text2);display:flex;align-items:center;gap:5px;cursor:pointer;">
+            <input type="checkbox" id="ex-demo-mode" style="accent-color:#00c8ff;"> Demo Trading (testnet)
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="exConnect()" class="ex-btn ex-btn-primary" style="flex:1;" id="ex-connect-btn">🔗 CONNECT</button>
+          <button onclick="exDisconnect()" class="ex-btn ex-btn-danger" id="ex-disconnect-btn" style="display:none;">DISCONNECT</button>
+        </div>
+      </div>
+      <div style="font-size:8px;color:rgba(255,255,255,.2);margin-top:10px;text-align:center;">
+        🔒 Keys stored locally in your browser · Never sent to ELCARO servers<br>
+        API signing happens in your browser via Web Crypto API
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ACCOUNT -->
+  <div id="ex-panel-account" style="display:none;">
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:3px;height:14px;background:var(--profit);border-radius:2px;"></span>
+        ACCOUNT BALANCE
+        <button onclick="exLoadAccount()" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 10px;color:var(--text2);font-size:8px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ REFRESH</button>
+      </div>
+      <div id="ex-balance-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.02);border-radius:8px;">
+          <div style="font-size:8px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:4px;">TOTAL EQUITY</div>
+          <div id="ex-equity" style="font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;color:#00c8ff;">—</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.02);border-radius:8px;">
+          <div style="font-size:8px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:4px;">AVAILABLE</div>
+          <div id="ex-available" style="font-size:22px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--text);">—</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.02);border-radius:8px;">
+          <div style="font-size:8px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:4px;">UNREALIZED PNL</div>
+          <div id="ex-upnl" style="font-size:16px;font-weight:800;font-family:'JetBrains Mono',monospace;">—</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.02);border-radius:8px;">
+          <div style="font-size:8px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:4px;">MARGIN USED</div>
+          <div id="ex-margin" style="font-size:16px;font-weight:800;font-family:'JetBrains Mono',monospace;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Balances -->
+    <div class="card">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:10px;">ASSET BALANCES</div>
+      <div id="ex-asset-balances" style="font-size:10px;color:var(--text2);text-align:center;padding:20px;">Connect API to view balances</div>
+    </div>
+  </div>
+
+  <!-- TAB: TRADE -->
+  <div id="ex-panel-trade" style="display:none;">
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:3px;height:14px;background:var(--orange);border-radius:2px;"></span>
+        PLACE ORDER
+      </div>
+
+      <!-- Market type -->
+      <div style="display:flex;gap:4px;margin-bottom:12px;">
+        <button class="ex-tab active" id="ex-mkt-futures" onclick="exSetMarket('futures')" style="flex:1;">FUTURES</button>
+        <button class="ex-tab" id="ex-mkt-spot" onclick="exSetMarket('spot')" style="flex:1;">SPOT</button>
+      </div>
+
+      <!-- Instrument -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">INSTRUMENT</div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="ex-trade-sym" class="ex-input" placeholder="BTC-USDT" value="BTC-USDT" style="flex:1;text-transform:uppercase;">
+          <button onclick="exFetchPrice()" class="ex-btn" style="background:rgba(0,200,255,.1);color:#00c8ff;border:1px solid rgba(0,200,255,.2);padding:8px 12px;font-size:9px;" id="ex-price-btn">PRICE</button>
+        </div>
+        <div id="ex-live-price" style="font-size:10px;color:var(--text2);margin-top:4px;font-family:'JetBrains Mono',monospace;"></div>
+      </div>
+
+      <!-- Side -->
+      <div class="ex-order-side">
+        <button class="ex-order-side-btn buy active" id="ex-side-buy" onclick="exSetSide('buy')">▲ BUY / LONG</button>
+        <button class="ex-order-side-btn sell" id="ex-side-sell" onclick="exSetSide('sell')">▼ SELL / SHORT</button>
+      </div>
+
+      <!-- Order type -->
+      <div style="display:flex;gap:4px;margin-bottom:12px;">
+        <button class="ex-tab active" id="ex-ot-market" onclick="exSetOrderType('market')" style="flex:1;">MARKET</button>
+        <button class="ex-tab" id="ex-ot-limit" onclick="exSetOrderType('limit')" style="flex:1;">LIMIT</button>
+      </div>
+
+      <!-- Price (limit only) -->
+      <div id="ex-limit-price-row" style="display:none;margin-bottom:10px;">
+        <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">LIMIT PRICE</div>
+        <input type="number" id="ex-trade-price" class="ex-input" placeholder="65000" step="any">
+      </div>
+
+      <!-- Size -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">SIZE (contracts)</div>
+          <input type="number" id="ex-trade-size" class="ex-input" placeholder="1" step="any" min="0">
+        </div>
+        <div id="ex-leverage-row">
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">LEVERAGE</div>
+          <input type="number" id="ex-trade-leverage" class="ex-input" placeholder="10" value="10" min="1" max="150" step="1">
+        </div>
+      </div>
+
+      <!-- TP/SL -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">TAKE PROFIT (opt)</div>
+          <input type="number" id="ex-trade-tp" class="ex-input" placeholder="—" step="any">
+        </div>
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">STOP LOSS (opt)</div>
+          <input type="number" id="ex-trade-sl" class="ex-input" placeholder="—" step="any">
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div id="ex-order-summary" style="background:rgba(255,255,255,.02);border-radius:8px;padding:10px;margin-bottom:12px;display:none;">
+        <div style="font-size:8px;font-weight:700;color:var(--text2);letter-spacing:.5px;margin-bottom:6px;">ORDER PREVIEW</div>
+        <div id="ex-order-preview" style="font-size:10px;color:var(--text);font-family:'JetBrains Mono',monospace;"></div>
+      </div>
+
+      <!-- Submit -->
+      <button onclick="exPlaceOrder()" class="ex-btn ex-btn-primary" style="width:100%;padding:12px;font-size:12px;letter-spacing:1px;" id="ex-submit-btn" disabled>
+        🔗 CONNECT API FIRST
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB: POSITIONS -->
+  <div id="ex-panel-positions" style="display:none;">
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:3px;height:14px;background:var(--purple);border-radius:2px;"></span>
+        OPEN POSITIONS
+        <span id="ex-pos-count" style="margin-left:auto;background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.25);border-radius:20px;padding:2px 8px;font-size:8px;font-weight:800;">0</span>
+        <button onclick="exLoadPositions()" style="background:none;border:1px solid var(--border2);border-radius:6px;padding:3px 10px;color:var(--text2);font-size:8px;font-weight:700;cursor:pointer;font-family:inherit;">⟳</button>
+      </div>
+      <div id="ex-positions-list" style="font-size:10px;color:var(--text2);text-align:center;padding:20px;">Connect API to view positions</div>
+    </div>
+
+    <!-- Order History -->
+    <div class="card">
+      <div onclick="document.getElementById('ex-history-list').style.display=document.getElementById('ex-history-list').style.display==='none'?'block':'none'" style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <span style="display:inline-block;width:3px;height:14px;background:var(--text2);border-radius:2px;"></span>
+        ORDER HISTORY
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--text2);fill:none;stroke-width:2.5;margin-left:auto;"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div id="ex-history-list" style="display:none;font-size:10px;color:var(--text2);text-align:center;padding:14px;">No order history</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════════════════════════════════════
