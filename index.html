@@ -11815,6 +11815,12 @@ function initSigmaButtons() {
     <div class="slabel">ACHIEVEMENTS <span id="ach-count-badge" style="font-size:9px;color:var(--gold);font-family:'Space Mono',monospace;font-weight:400;"></span></div>
     <div id="ach-list-container"></div>
 
+    <!-- MY FORECASTS -->
+    <div class="slabel">MY FORECASTS <span id="prof-fc-count" style="font-size:8px;color:#555;font-weight:400;font-family:'Space Mono',monospace;">0 ACTIVE</span></div>
+    <div id="prof-forecasts-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+      <!-- populated by renderProfileForecasts() -->
+    </div>
+
     <!-- EARN MORE -->
     <div class="slabel">EARN MORE COINS</div>
     <div class="quest-item" id="earn-share-btn" onclick="profEarnShare(this)"><div class="qi-icon">📢</div><div class="qi-info"><div class="qi-name">Share to Social</div><div class="qi-desc">TELEGRAM / X / INSTAGRAM</div></div><div class="qi-reward"><div class="qi-coins">+50⬡</div><div class="qi-extra" style="color:var(--bronze)">+BRONZE</div></div></div>
@@ -14278,6 +14284,155 @@ function guildContributeCoins() {
   opAdvanceQuest('wq3');
 }
 
+/* ── DIRECT CONTRIBUTION FLOWS ── */
+function guildOpenContribCoins() {
+  // Show amount picker popup
+  const amounts = [100, 250, 500, 1000];
+  const chips = amounts.map(a => {
+    const canAfford = OC.coins >= a;
+    return '<div class="comb-btn" style="background:rgba(255,106,0,.06);border-color:rgba(255,106,0,.3);color:'+(canAfford?'var(--orange)':'#333')+';'+(canAfford?'cursor:pointer':'opacity:.4;pointer-events:none')+'" onclick="guildContribute(\'coins\','+a+');guildCloseModal(\'guild-contrib-coins-modal\')">' +
+      '<span style="font-size:22px">⬡</span>' +
+      '<div style="font-size:15px;font-weight:800;margin:4px 0">'+a+'</div>' +
+      '<div style="font-size:9px;color:#555;font-family:\'Space Mono\',monospace">ORACLE COINS</div></div>';
+  }).join('');
+  _showGuildPickerModal('guild-contrib-coins-modal', '⬡ CONTRIBUTE COINS', 'YOUR BALANCE: '+OC.coins.toLocaleString()+'⬡', chips);
+}
+
+function guildOpenContribChest() {
+  const order = ['wood','bronze','silver','gold','diamond'];
+  const CHEST_ICONS = {wood:'🪵',bronze:'📦',silver:'🥈',gold:'🏆',diamond:'💎'};
+  const CHEST_COLORS = {wood:'139,90,43',bronze:'205,127,50',silver:'192,192,192',gold:'255,215,0',diamond:'0,229,255'};
+  let chips = '';
+  let hasAny = false;
+  order.forEach(k => {
+    const cnt = OC.inventory[k] || 0;
+    if (cnt > 0) {
+      hasAny = true;
+      chips += '<div class="comb-btn" style="background:rgba('+CHEST_COLORS[k]+',.06);border-color:rgba('+CHEST_COLORS[k]+',.3);color:rgba('+CHEST_COLORS[k]+',1);cursor:pointer" onclick="guildContribute(\'chest\',\''+k+'\');guildCloseModal(\'guild-contrib-chest-modal\')">' +
+        '<span style="font-size:22px">'+CHEST_ICONS[k]+'</span>' +
+        '<div style="font-size:13px;font-weight:800;margin:4px 0">'+k.toUpperCase()+'</div>' +
+        '<div style="font-size:9px;color:#555;font-family:\'Space Mono\',monospace">×'+cnt+' IN VAULT</div></div>';
+    }
+  });
+  if (!hasAny) { showToast('⚠ No chests in your vault!'); return; }
+  _showGuildPickerModal('guild-contrib-chest-modal', '📦 CONTRIBUTE CHEST', 'CHOOSE FROM YOUR VAULT', chips);
+}
+
+function guildOpenContribForecast() {
+  if (!OC.ownedForecasts || !OC.ownedForecasts.length) { showToast('⚠ No forecasts to contribute'); return; }
+  let chips = OC.ownedForecasts.slice(0,8).map((f,i) => {
+    const dir = (f.dir||'').includes('BULL') ? '↑' : '↓';
+    return '<div class="comb-btn" style="background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.3);color:var(--cyan);cursor:pointer" onclick="guildContribute(\'forecast\','+i+');guildCloseModal(\'guild-contrib-forecast-modal\')">' +
+      '<span style="font-size:18px">'+(f.icon||'📄')+'</span>' +
+      '<div style="font-size:12px;font-weight:800;margin:4px 0">'+(f.sym||f.asset||'?')+' '+dir+'</div>' +
+      '<div style="font-size:9px;color:#555;font-family:\'Space Mono\',monospace">'+(f.tf||'')+' · '+(f.mult||'×1')+'</div></div>';
+  }).join('');
+  _showGuildPickerModal('guild-contrib-forecast-modal', '📄 CONTRIBUTE FORECAST', OC.ownedForecasts.length+' AVAILABLE', chips);
+}
+
+function _showGuildPickerModal(id, title, sub, chipsHtml) {
+  // Remove existing if any
+  let el = document.getElementById(id);
+  if (el) el.remove();
+  el = document.createElement('div');
+  el.id = id;
+  el.className = 'guild-overlay';
+  el.onclick = function(e) { if (e.target === el) guildCloseModal(id); };
+  el.innerHTML = '<div class="guild-sheet">' +
+    '<div class="gsheet-handle"></div>' +
+    '<div class="gsheet-title">'+title+'</div>' +
+    '<div class="gsheet-sub">'+sub+'</div>' +
+    '<div class="contrib-modal-grid">'+chipsHtml+'</div>' +
+    '<button onclick="guildCloseModal(\''+id+'\')" style="width:100%;padding:11px;border-radius:11px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:\'Syne\',sans-serif;margin-top:6px;">CANCEL</button>' +
+    '</div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('open'));
+}
+
+function guildAlertMembers() {
+  guildSystemMsg('📢 GUILD ALERT: Treasury opens in 1 hour! Make sure to contribute before it distributes! 🔮');
+  showToast('📢 Alert sent to all guild members!');
+}
+
+function guildDistributeTreasury() {
+  const t = OC_EXT.guildTreasury;
+  if (t.coins < 1 && t.forecasts < 1 && Object.values(t.chests||{}).reduce((a,b)=>a+b,0) < 1) {
+    showToast('⚠ Treasury is empty!');
+    return;
+  }
+  const members = guildState.members || 8;
+
+  // Distribute coins equally
+  const coinsPerMember = Math.floor(t.coins / members);
+  OC.coins += coinsPerMember;
+
+  // Open chests — Gold/Diamond can contain ORACLE CARDS + PASS ACCESS
+  const CHEST_REWARDS = {
+    wood: { coins: 50, label: 'Wood Chest: +50⬡' },
+    bronze: { coins: 100, label: 'Bronze Chest: +100⬡' },
+    silver: { coins: 250, label: 'Silver Chest: +250⬡' },
+    gold: { coins: 500, oracleCard: true, label: 'Gold Chest: +500⬡ + 🃏 ORACLE CARD' },
+    diamond: { coins: 1000, oracleCard: true, passAccess: true, label: 'Diamond Chest: +1000⬡ + 🃏 ORACLE CARD + 🔑 PASS ACCESS' }
+  };
+  let bonusCoins = 0;
+  let gotOracleCard = false;
+  let gotPassAccess = false;
+  let chestRewards = [];
+  const chestObj = t.chests || {};
+  for (const [k, cnt] of Object.entries(chestObj)) {
+    if (cnt <= 0) continue;
+    const rw = CHEST_REWARDS[k];
+    if (!rw) continue;
+    // Each member gets a share of each chest's reward
+    const perMember = Math.floor(rw.coins / members);
+    bonusCoins += perMember * cnt;
+    if (rw.oracleCard) gotOracleCard = true;
+    if (rw.passAccess) gotPassAccess = true;
+    chestRewards.push(cnt + '× ' + rw.label);
+  }
+  OC.coins += bonusCoins;
+
+  // Track oracle cards
+  if (gotOracleCard) {
+    if (!OC_EXT.oracleCards) OC_EXT.oracleCards = 0;
+    OC_EXT.oracleCards++;
+  }
+  if (gotPassAccess) {
+    if (!OC_EXT.passAccess) OC_EXT.passAccess = [];
+    OC_EXT.passAccess.push({ type: 'guild_treasury', date: new Date().toISOString().slice(0,10) });
+  }
+
+  // Distribute forecasts
+  const forecsPerMember = Math.floor(t.forecasts / members);
+  if (forecsPerMember > 0 && OC.ownedForecasts) {
+    for (let i = 0; i < forecsPerMember; i++) {
+      OC.ownedForecasts.push({ sym: 'BTC', tf: '4H', dir: 'BULL', mult: '×1', icon: '📄', date: new Date().toLocaleDateString(), source: 'guild_treasury' });
+    }
+  }
+
+  // Build result summary
+  let summary = '🔮 TREASURY DISTRIBUTED!\n';
+  summary += '⬡ ' + coinsPerMember + ' coins per member';
+  if (bonusCoins > 0) summary += ' + ' + bonusCoins + '⬡ from chests';
+  if (forecsPerMember > 0) summary += '\n📄 ' + forecsPerMember + ' forecasts received';
+  if (gotOracleCard) summary += '\n🃏 ORACLE CARD unlocked!';
+  if (gotPassAccess) summary += '\n🔑 PASS ACCESS granted!';
+
+  // Reset treasury
+  t.coins = 0;
+  t.chests = {};
+  t.forecasts = 0;
+
+  oracleRenderVaultCoins();
+  ocSave();
+  updateGuildTreasuryUI();
+  opRenderGuild();
+
+  guildSystemMsg('🔮 Treasury distributed! Each member received ' + coinsPerMember + '⬡' + (bonusCoins > 0 ? ' + ' + bonusCoins + '⬡ from chests' : '') + (forecsPerMember > 0 ? ' + ' + forecsPerMember + ' forecasts' : '') + (gotOracleCard ? ' + 🃏 Oracle Card' : '') + (gotPassAccess ? ' + 🔑 Pass Access' : ''));
+  showToast(summary);
+  opAdvanceQuest('wq3');
+}
+
 function guildInvite() {
   const link = 'https://t.me/elcarocalculator_bot?start=guild_oracle_covenant';
   if (navigator.clipboard) {
@@ -14452,6 +14607,12 @@ function opRenderProfile() {
   if (lvlEl) lvlEl.textContent = bpLvl;
   if (txtEl) txtEl.textContent = `LVL ${bpLvl} · ${xpInLevel}/${xpPerLevel} XP`;
   if (barEl) barEl.style.width = Math.round(xpInLevel/xpPerLevel*100)+'%';
+
+  // ── My Forecasts ───────────────────────────────
+  renderProfileForecasts();
+
+  // ── Oracle DNA (dynamic) ──────────────────────────
+  generateDNA();
 
   // ── Streak Insurance ─────────────────────────────
   renderStreakInsurance();
@@ -15058,13 +15219,21 @@ function guildSystemMsg(text) {
 }
 function updateGuildTreasuryUI() {
   const t = OC_EXT.guildTreasury;
-  const coinsEl = document.querySelector('.tc-item .tc-val');
   const total = Object.values(t.chests||{}).reduce((a,b)=>a+b,0);
-  // Find tc items
-  const tcVals = document.querySelectorAll('.tc-val');
-  if (tcVals[0]) tcVals[0].textContent = t.coins.toLocaleString();
-  if (tcVals[1]) tcVals[1].textContent = total;
-  if (tcVals[2]) tcVals[2].textContent = t.forecasts;
+  // Update treasury grid in guild section
+  var gtcC = document.getElementById('gtc-coins');
+  var gtcCh = document.getElementById('gtc-chests');
+  var gtcF = document.getElementById('gtc-forecasts');
+  if (gtcC) gtcC.textContent = t.coins.toLocaleString();
+  if (gtcCh) gtcCh.textContent = total;
+  if (gtcF) gtcF.textContent = t.forecasts;
+  // Update treasury modal too
+  var gtmC = document.getElementById('gtm-coins');
+  var gtmCh = document.getElementById('gtm-chests');
+  var gtmF = document.getElementById('gtm-forecasts');
+  if (gtmC) gtmC.textContent = t.coins.toLocaleString();
+  if (gtmCh) gtmCh.textContent = total;
+  if (gtmF) gtmF.textContent = t.forecasts;
 }
 function renderGuildShareRow() {
   const row = document.getElementById('guild-share-row');
@@ -15302,45 +15471,161 @@ function generateDNA() {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0,0,W,H);
-  // Generate unique pattern based on user stats
-  const seed = OC.streak * 7 + OC.accuracy * 3 + OC.daysActive;
+
+  // Dynamic DNA: more inputs = more unique pattern
+  const totalChests = Object.values(OC.inventory||{}).reduce((a,b)=>a+b,0);
+  const totalForecasts = (OC.ownedForecasts||[]).length;
+  const arenaWins = OC_EXT.arenaWins || 0;
+  const guildCoins = (guildState && guildState.coins) || 0;
+  const oracleCards = (OC_EXT.oracleCards || 0);
+
+  // Composite seed from ALL activity
+  const seed = (OC.streak||0)*7 + (OC.accuracy||0)*3 + (OC.daysActive||1) + totalChests*11 + totalForecasts*5 + arenaWins*13 + OC.coins*0.01 + guildCoins*0.02 + oracleCards*17;
   const seeded = (n) => Math.sin(seed * n * 13.7) * 0.5 + 0.5;
-  const colors = ['#f7931a','#00e5a0','#7c3fff','#00e5ff','#c084fc','#ffd700'];
+
+  // Color palette based on rank
+  const rankColors = {
+    diamond: ['#00e5ff','#c084fc','#ffd700','#00e5a0'],
+    gold:    ['#ffd700','#f7931a','#ff6500','#c084fc'],
+    silver:  ['#c0c0c0','#7c3fff','#00e5ff','#aaa'],
+    bronze:  ['#cd7f32','#f7931a','#8b4513','#daa520']
+  };
+  var rankTier = 'bronze';
+  if ((OC.accuracy||0) >= 85) rankTier = 'diamond';
+  else if ((OC.accuracy||0) >= 70) rankTier = 'gold';
+  else if ((OC.accuracy||0) >= 50) rankTier = 'silver';
+  const colors = rankColors[rankTier];
   const baseColor = colors[Math.floor(seeded(1)*colors.length)];
   const accentColor = colors[Math.floor(seeded(2)*colors.length)];
+
+  // Helix complexity scales with activity
+  const helixWaves = 3 + Math.min(4, Math.floor((OC.daysActive||1)/10));
+  const amplitude = (H/2-10) * (0.6 + seeded(5)*0.4);
+
   // Draw DNA double helix
   const grad = ctx.createLinearGradient(0,0,W,0);
   grad.addColorStop(0, baseColor + 'cc');
   grad.addColorStop(0.5, accentColor + 'cc');
   grad.addColorStop(1, baseColor + 'cc');
+
   // Strand 1
   ctx.beginPath(); ctx.strokeStyle=grad; ctx.lineWidth=2.5;
   for (let x=0;x<=W;x++) {
-    const y = H/2 + Math.sin((x/W)*Math.PI*4 + seeded(3)) * (H/2-10);
+    const y = H/2 + Math.sin((x/W)*Math.PI*helixWaves*2 + seeded(3)*3) * amplitude;
     x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
   // Strand 2
   ctx.beginPath(); ctx.globalAlpha=0.5; ctx.lineWidth=1.5;
   for (let x=0;x<=W;x++) {
-    const y = H/2 - Math.sin((x/W)*Math.PI*4 + seeded(3)) * (H/2-10);
+    const y = H/2 - Math.sin((x/W)*Math.PI*helixWaves*2 + seeded(3)*3) * amplitude;
     x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
-  // Connections
+
+  // Connections — more nodes for more active users
   ctx.globalAlpha=1;
-  const nodes = Math.floor(seeded(4)*3)+4;
+  const nodes = Math.floor(seeded(4)*3) + 4 + Math.min(4, Math.floor(arenaWins/3));
   for (let i=1;i<=nodes;i++) {
     const x = (W/(nodes+1))*i;
-    const y1 = H/2 + Math.sin((x/W)*Math.PI*4 + seeded(3)) * (H/2-10);
-    const y2 = H/2 - Math.sin((x/W)*Math.PI*4 + seeded(3)) * (H/2-10);
+    const y1 = H/2 + Math.sin((x/W)*Math.PI*helixWaves*2 + seeded(3)*3) * amplitude;
+    const y2 = H/2 - Math.sin((x/W)*Math.PI*helixWaves*2 + seeded(3)*3) * amplitude;
     ctx.beginPath(); ctx.strokeStyle='#ffffff22'; ctx.lineWidth=1;
     ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+    // Node size scales with accuracy
+    var nodeSize = 3 + Math.min(2, (OC.accuracy||0)/40);
     ctx.beginPath(); ctx.fillStyle=colors[i%colors.length]+'dd';
-    ctx.arc(x,y1,3.5,0,Math.PI*2); ctx.fill();
+    ctx.arc(x,y1,nodeSize,0,Math.PI*2); ctx.fill();
     ctx.beginPath();
-    ctx.arc(x,y2,3.5,0,Math.PI*2); ctx.fill();
+    ctx.arc(x,y2,nodeSize,0,Math.PI*2); ctx.fill();
   }
+
+  // Oracle cards glow particles
+  if (oracleCards > 0) {
+    for (let p=0;p<Math.min(oracleCards,5);p++) {
+      var px = seeded(10+p)*W;
+      var py = seeded(20+p)*H;
+      ctx.beginPath(); ctx.fillStyle='#ffd70055';
+      ctx.arc(px,py,2,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  // Update DNA subtitle with personality
+  var dnaSubEl = document.querySelector('.dna-sub');
+  if (dnaSubEl) {
+    var traits = [];
+    if ((OC.streak||0)>=10) traits.push('Consistent');
+    else traits.push('Growing');
+    if ((OC.accuracy||0)>=70) traits.push('Precise');
+    else if ((OC.accuracy||0)>=40) traits.push('Developing');
+    else traits.push('Exploring');
+    if (arenaWins>=5) traits.push('Competitive');
+    if (totalForecasts>=5) traits.push('Collector');
+    if (guildCoins>=500) traits.push('Generous');
+    dnaSubEl.textContent = traits.join(' · ') + ' · Rank: ' + rankTier.toUpperCase();
+  }
+}
+
+// ── PROFILE FORECASTS ─────────────────────────────
+function renderProfileForecasts() {
+  var container = document.getElementById('prof-forecasts-list');
+  var countEl = document.getElementById('prof-fc-count');
+  if (!container) return;
+  var fc = OC.ownedForecasts || [];
+  if (countEl) countEl.textContent = fc.length + ' ACTIVE';
+  if (!fc.length) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:#333;font-size:10px;font-family:\'Space Mono\',monospace;">No forecasts yet — spin or buy from market</div>';
+    return;
+  }
+  container.innerHTML = fc.map(function(f, i) {
+    var dir = (f.dir||'').includes('BULL') ? '↑ BULL' : '↓ BEAR';
+    var dirColor = (f.dir||'').includes('BULL') ? 'var(--green)' : 'var(--loss,#ef4444)';
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid #1a1a1a;border-radius:12px;padding:10px 12px;">' +
+      '<span style="font-size:20px">'+(f.icon||'📄')+'</span>' +
+      '<div style="flex:1"><div style="font-size:11px;font-weight:700;color:#fff">'+(f.sym||f.asset||'?')+' · '+(f.tf||'?')+' · <span style="color:'+dirColor+'">'+dir+'</span></div>' +
+      '<div style="font-size:9px;color:#555;font-family:\'Space Mono\',monospace;margin-top:2px">'+(f.mult||'×1')+' · '+(f.date||'')+(f.source?' · '+f.source:'')+'</div></div>' +
+      '<div style="display:flex;gap:4px;">' +
+        '<button onclick="profForecastTrade('+i+')" style="padding:5px 10px;border-radius:8px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:var(--green);font-size:9px;font-weight:700;cursor:pointer;font-family:\'Space Mono\',monospace;">TRADE</button>' +
+        '<button onclick="profForecastPass('+i+')" style="padding:5px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.06);color:var(--loss,#ef4444);font-size:9px;font-weight:700;cursor:pointer;font-family:\'Space Mono\',monospace;">PASS</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+function profForecastTrade(idx) {
+  var fc = OC.ownedForecasts;
+  if (!fc || !fc[idx]) return;
+  var f = fc[idx];
+  // Trading increases accuracy if forecast is correct (simulated: 60% chance correct)
+  var correct = Math.random() < 0.6;
+  var pnl = correct ? Math.floor(Math.random()*200+50) : -Math.floor(Math.random()*100+20);
+  OC.coins += Math.max(0, pnl);
+  fc.splice(idx, 1);
+  if (correct) {
+    OC.accuracy = Math.min(100, OC.accuracy + 1);
+    showToast('✅ TRADE WON! +'+pnl+'⬡ · Accuracy +1%');
+    guildSystemMsg('📈 YOU traded a '+(f.sym||'')+' '+(f.tf||'')+' forecast and WON +'+pnl+'⬡!');
+  } else {
+    OC.accuracy = Math.max(0, OC.accuracy - 1);
+    showToast('❌ TRADE LOST · Accuracy -1% — next time!');
+    guildSystemMsg('📉 YOU traded a '+(f.sym||'')+' '+(f.tf||'')+' forecast — lost.');
+  }
+  oracleRenderVaultCoins();
+  ocSave();
+  renderProfileForecasts();
+  generateDNA(); // DNA changes with activity
+}
+
+function profForecastPass(idx) {
+  var fc = OC.ownedForecasts;
+  if (!fc || !fc[idx]) return;
+  var f = fc[idx];
+  // Passing is safe — no accuracy change, small coin reward for discipline
+  fc.splice(idx, 1);
+  OC.coins += 10;
+  showToast('⏭ PASSED on '+(f.sym||'')+' '+(f.tf||'')+' forecast · +10⬡ discipline bonus');
+  oracleRenderVaultCoins();
+  ocSave();
+  renderProfileForecasts();
 }
 
 // ── BATTLE PASS RENDER ────────────────────────────
@@ -16104,8 +16389,11 @@ function pnlDeleteTrade(id) {
       <div class="treasury-cell"><span class="tc-icon">📦</span><div class="tc-val" id="gtc-chests">3</div><div class="tc-lbl">CHESTS</div></div>
       <div class="treasury-cell"><span class="tc-icon">📄</span><div class="tc-val" id="gtc-forecasts">7</div><div class="tc-lbl">FORECASTS</div></div>
     </div>
-    <button class="treasury-cta locked" id="guild-treasury-btn" onclick="guildOpenModal('guild-treasury-modal')">
-      🔒 OPEN TREASURY — Guild Leader Only
+    <button onclick="guildAlertMembers()" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(245,166,35,.3);background:rgba(245,166,35,.06);color:var(--orange);font-size:10px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-bottom:6px;letter-spacing:.5px;">
+      📢 ALERT ALL MEMBERS — Treasury opens in 1 hour!
+    </button>
+    <button class="treasury-cta" id="guild-treasury-btn" onclick="guildDistributeTreasury()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff6500,#f5a623);color:#000;font-size:11px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.5px;">
+      🔮 OPEN TREASURY — Distribute to All Members
     </button>
   </div>
 
@@ -16114,9 +16402,9 @@ function pnlDeleteTrade(id) {
   <div class="contribute-card">
     <div class="contribute-title">YOUR WEEKLY CONTRIBUTION</div>
     <div class="contribute-grid">
-      <div class="contrib-btn cb-coins" onclick="guildOpenModal('guild-contrib-modal')"><span class="cb-icon">⬡</span><div class="cb-name">+100 OC</div><div class="cb-sub">COINS</div></div>
-      <div class="contrib-btn cb-chest" onclick="guildOpenModal('guild-contrib-modal')"><span class="cb-icon">📦</span><div class="cb-name">ANY CHEST</div><div class="cb-sub">FROM VAULT</div></div>
-      <div class="contrib-btn cb-forecast" onclick="guildOpenModal('guild-contrib-modal')"><span class="cb-icon">📄</span><div class="cb-name">FORECAST</div><div class="cb-sub">UNUSED</div></div>
+      <div class="contrib-btn cb-coins" onclick="guildOpenContribCoins()"><span class="cb-icon">⬡</span><div class="cb-name">COINS</div><div class="cb-sub">CHOOSE AMOUNT</div></div>
+      <div class="contrib-btn cb-chest" onclick="guildOpenContribChest()"><span class="cb-icon">📦</span><div class="cb-name">CHEST</div><div class="cb-sub">FROM VAULT</div></div>
+      <div class="contrib-btn cb-forecast" onclick="guildOpenContribForecast()"><span class="cb-icon">📄</span><div class="cb-name">FORECAST</div><div class="cb-sub">UNUSED</div></div>
     </div>
   </div>
 
