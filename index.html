@@ -10971,9 +10971,6 @@ function initSigmaButtons() {
       <div class="op-tab" onclick="oracleTab('prophecies',this)">
         <span class="op-tab-icon">⚔️</span>ARENA
       </div>
-      <div class="op-tab" onclick="oracleTab('traders',this)">
-        <span class="op-tab-icon">👁</span>TRADERS
-      </div>
       <div class="op-tab" onclick="oracleTab('news',this)">
         <span class="op-tab-icon">📰</span>NEWS
       </div>
@@ -11137,7 +11134,6 @@ function initSigmaButtons() {
         <div class="om-tabs">
           <div class="om-tab active" onclick="opTab(this,'op-tab-calls')">ORACLE CALLS</div>
           <div class="om-tab" onclick="opTab(this,'op-tab-duels')">ARENA DUELS</div>
-          <div class="om-tab" onclick="opTab(this,'op-tab-mkt')">MARKETPLACE</div>
         </div>
 
         <!-- ORACLE CALLS -->
@@ -11174,8 +11170,8 @@ function initSigmaButtons() {
         <div class="verdict-bar-wrap"><div class="verdict-bar-yes" style="width:40%"></div></div>
         <div class="verdict-my-bet" id="btc-my-bet">✓ YOUR BET: <span id="btc-bet-label">—</span></div>
         <div class="verdict-btns">
-          <button class="verdict-btn-yes" onclick="openVerdictBet('BTC','BITCOIN','₿','4H','Bull','btc')">✓ YES — WILL WORK</button>
-          <button class="verdict-btn-no" onclick="openVerdictBet('BTC','BITCOIN','₿','4H','Bear','btc')">✗ NO — WON'T</button>
+          <button class="verdict-btn-yes" onclick="openVerdictBet('BTC','BITCOIN','₿','4H','Bull','btc','yes')">✓ YES — WILL WORK</button>
+          <button class="verdict-btn-no" onclick="openVerdictBet('BTC','BITCOIN','₿','4H','Bull','btc','no')">✗ NO — WON'T</button>
         </div>
       </div>
     </div>
@@ -11209,8 +11205,8 @@ function initSigmaButtons() {
         <div class="verdict-bar-wrap"><div class="verdict-bar-yes" style="width:68%"></div></div>
         <div class="verdict-my-bet" id="gold-my-bet">✓ YOUR BET: <span id="gold-bet-label">—</span></div>
         <div class="verdict-btns">
-          <button class="verdict-btn-yes" onclick="openVerdictBet('GOLD','GOLD/XAU','⬡','1M','Bull','gold')">✓ YES — WILL HIT</button>
-          <button class="verdict-btn-no" onclick="openVerdictBet('GOLD','GOLD/XAU','⬡','1M','Bear','gold')">✗ NO — WON'T</button>
+          <button class="verdict-btn-yes" onclick="openVerdictBet('GOLD','GOLD/XAU','⬡','1M','Bull','gold','yes')">✓ YES — WILL HIT</button>
+          <button class="verdict-btn-no" onclick="openVerdictBet('GOLD','GOLD/XAU','⬡','1M','Bull','gold','no')">✗ NO — WON'T</button>
         </div>
       </div>
     </div>
@@ -11243,8 +11239,8 @@ function initSigmaButtons() {
         <div class="verdict-bar-wrap"><div class="verdict-bar-yes" style="width:46%"></div></div>
         <div class="verdict-my-bet" id="spx-my-bet">✓ YOUR BET: <span id="spx-bet-label">—</span></div>
         <div class="verdict-btns">
-          <button class="verdict-btn-yes" onclick="openVerdictBet('SPX','S&P 500','📊','1W','Bear','spx')">✓ YES — WILL DROP</button>
-          <button class="verdict-btn-no" onclick="openVerdictBet('SPX','S&P 500','📊','1W','Bull','spx')">✗ NO — WON'T</button>
+          <button class="verdict-btn-yes" onclick="openVerdictBet('SPX','S&P 500','📊','1W','Bear','spx','yes')">✓ YES — WILL DROP</button>
+          <button class="verdict-btn-no" onclick="openVerdictBet('SPX','S&P 500','📊','1W','Bear','spx','no')">✗ NO — WON'T</button>
         </div>
       </div>
     </div>
@@ -11272,14 +11268,6 @@ function initSigmaButtons() {
         </div>
 
         <!-- MARKETPLACE -->
-        <div id="op-tab-mkt" style="display:none;">
-          <div style="padding:0 12px 8px;display:flex;gap:7px;">
-            <button onclick="switchMktFilter(this,'all')" style="background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:9px;padding:6px 12px;font-size:10px;font-weight:700;color:var(--orange);cursor:pointer;font-family:'Space Mono',monospace;" class="mkt-filter arena-mkt-filter active-f">ALL</button>
-            <button onclick="switchMktFilter(this,'forecasts')" style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:6px 12px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;font-family:'Space Mono',monospace;" class="mkt-filter arena-mkt-filter">FORECASTS</button>
-            <button onclick="switchMktFilter(this,'chests')" style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:6px 12px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;font-family:'Space Mono',monospace;" class="mkt-filter arena-mkt-filter">CHESTS</button>
-          </div>
-          <div id="arena-mkt-list" style="padding:0 12px 16px;display:flex;flex-direction:column;gap:8px;"></div>
-        </div>
 
         </div>
       </div>
@@ -11386,23 +11374,7 @@ function initSigmaButtons() {
 
         </div>
       </div>
-      <!-- ══ TRADERS ══ -->
-      <div class="op-screen" id="op-traders" style="display:none;">
-        <div class="scrollable-op">
-          <div class="slabel">ORACLE TRADERS <span style="font-size:9px;color:var(--text3);font-family:'Space Mono',monospace;font-weight:400;float:right;padding-top:1px;" id="traders-count"></span></div>
-
-          <!-- Filter bar -->
-          <div style="display:flex;gap:6px;padding:0 12px 10px;overflow-x:auto;scrollbar-width:none;">
-            <button onclick="tradersFilter('all',this)" class="t-filter-btn active-tf" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid rgba(245,166,35,.4);background:rgba(245,166,35,.1);color:var(--orange);font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">ALL</button>
-            <button onclick="tradersFilter('bull',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">🟢 BUYING</button>
-            <button onclick="tradersFilter('bear',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">🔴 SELLING</button>
-            <button onclick="tradersFilter('top',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">⭐ TOP</button>
-            <button onclick="tradersFilter('subscribed',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">✓ SUBSCRIBED</button>
-          </div>
-
-          <div id="traders-list" style="display:flex;flex-direction:column;gap:0;"></div>
-        </div>
-      </div>
+      <!-- TRADERS tab removed — unified into Oracle > TRADERS sub-tab -->
 
       <!-- ══ PROFILE ══ -->
       <!-- ══ NEWS ══ -->
@@ -11475,7 +11447,6 @@ function initSigmaButtons() {
     <div class="oracle-tab active" id="oc-ot-prophecies" onclick="ocSwitchTab('prophecies')">PROPHECIES</div>
     <div class="oracle-tab"        id="oc-ot-mybets"     onclick="ocSwitchTab('mybets')">MY BETS</div>
     <div class="oracle-tab"        id="oc-ot-leaderboard"onclick="ocSwitchTab('leaderboard')">TOP ORACLES</div>
-    <div class="oracle-tab"        id="oc-ot-market"     onclick="ocSwitchTab('market')">MARKETPLACE</div>
     <div class="oracle-tab"        id="oc-ot-traders"    onclick="ocSwitchTab('traders')">TRADERS</div>
   </div>
 
@@ -11677,189 +11648,21 @@ function initSigmaButtons() {
     </div>
 
     <!-- ══════ VIEW: MARKETPLACE ══════ -->
-    <div id="oc-view-market" style="display:none">
-      <div class="o-label">P2P MARKETPLACE</div>
-      <div class="market-filters">
-        <div class="mf-btn active" onclick="ocFilterMarket(this,'all')">ALL</div>
-        <div class="mf-btn" onclick="ocFilterMarket(this,'forecast')">FORECASTS</div>
-        <div class="mf-btn" onclick="ocFilterMarket(this,'chest')">CHESTS</div>
-      </div>
 
-      <!-- forecast items -->
-      <div class="market-item" data-type="forecast" onclick="ocOpenMarket({icon:'N',name:'NVDA 4H',meta:'4H · Bull · ×2 multiplier',seller:'@quant_97',price:'280',type:'forecast',rarity:''})">
-        <div class="mi-asset-icon">N</div>
-        <div class="mi-info">
-          <div class="mi-name">NVDA 4H Bull <span class="mult-pill">×2</span></div>
-          <div class="mi-meta"><span class="tf-pill" style="background:rgba(0,229,255,.06);color:var(--cyan);border:1px solid rgba(0,229,255,.15)">4H</span> · Never opened · Expires May '26</div>
-        </div>
-        <div class="mi-price-wrap"><div class="mi-price">280⬡</div><div class="mi-seller">@quant_97</div></div>
-      </div>
-
-      <div class="market-item" data-type="forecast" onclick="ocOpenMarket({icon:'₿',name:'BTC 1D',meta:'1D · Bull · ×3 multiplier',seller:'@seer_22',price:'540',type:'forecast',rarity:''})">
-        <div class="mi-asset-icon">₿</div>
-        <div class="mi-info">
-          <div class="mi-name">BTC 1D Bull <span class="mult-pill">×3</span></div>
-          <div class="mi-meta"><span class="tf-pill" style="background:rgba(0,229,255,.06);color:var(--cyan);border:1px solid rgba(0,229,255,.15)">1D</span> · Never opened · Expires Jun '26</div>
-        </div>
-        <div class="mi-price-wrap"><div class="mi-price">540⬡</div><div class="mi-seller">@seer_22</div></div>
-      </div>
-
-      <div class="market-item" data-type="forecast" onclick="ocOpenMarket({icon:'⬡',name:'GOLD 1W',meta:'1W · Bear · ×4 multiplier',seller:'@legend',price:'890',type:'forecast',rarity:''})">
-        <div class="mi-asset-icon">⬡</div>
-        <div class="mi-info">
-          <div class="mi-name">GOLD 1W Bear <span class="mult-pill">×4</span></div>
-          <div class="mi-meta"><span class="tf-pill" style="background:rgba(0,229,255,.06);color:var(--cyan);border:1px solid rgba(0,229,255,.15)">1W</span> · Never opened · Expires Apr '26</div>
-        </div>
-        <div class="mi-price-wrap"><div class="mi-price">890⬡</div><div class="mi-seller">@legend</div></div>
-      </div>
-
-      <!-- chest items -->
-      <div class="market-item" data-type="chest" onclick="ocOpenMarket({icon:'🏆',name:'Gold Chest',meta:'5-7 forecasts · Very rare · Unopened',seller:'@diamond_seer',price:'4,500',type:'chest',rarity:'rarity-gold'})">
-        <div class="mi-asset-icon" style="font-size:24px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2)">🏆</div>
-        <div class="mi-info">
-          <div class="mi-name"><span class="tf-pill rarity-gold">GOLD CHEST</span></div>
-          <div class="mi-meta">5-7 forecasts · Very rare · Unopened</div>
-        </div>
-        <div class="mi-price-wrap"><div class="mi-price">4,500⬡</div><div class="mi-seller">@diamond_seer</div></div>
-      </div>
-
-      <div class="market-item" data-type="chest" onclick="ocOpenMarket({icon:'💎',name:'Diamond Chest',meta:'8-12 forecasts · Legendary · Unopened',seller:'@legend',price:'14,000',type:'chest',rarity:'rarity-diamond'})">
-        <div class="mi-asset-icon" style="font-size:24px;background:rgba(137,212,245,.06);border:1px solid rgba(137,212,245,.2)">💎</div>
-        <div class="mi-info">
-          <div class="mi-name"><span class="tf-pill rarity-diamond">DIAMOND CHEST</span></div>
-          <div class="mi-meta">8-12 forecasts · Legendary · Unopened</div>
-        </div>
-        <div class="mi-price-wrap"><div class="mi-price">14,000⬡</div><div class="mi-seller">@legend</div></div>
-      </div>
-
-      <div class="market-item" data-type="chest" onclick="ocOpenMarket({icon:'🪙',name:'Silver Chest',meta:'3-5 forecasts · Uncommon · Unopened',seller:'@seer_x7',price:'1,800',type:'chest',rarity:'rarity-silver'})">
-        <div class="mi-asset-icon" style="font-size:24px;background:rgba(184,184,204,.05);border:1px solid rgba(184,184,204,.15)">🪙</div>
-        <div class="mi-info">
-          <div class="mi-name"><span class="tf-pill rarity-silver">SILVER CHEST</span></div>
-          <div class="mi-meta">3-5 forecasts · Uncommon · Unopened</div>
-        </div>
-        <div class="mi-price-wrap"><div class="mi-price">1,800⬡</div><div class="mi-seller">@seer_x7</div></div>
-      </div>
-    </div>
-
-    <!-- ══════ VIEW: TRADERS ══════ -->
+    <!-- ══════ VIEW: TRADERS (unified — uses dynamic renderTradersList) ══════ -->
     <div id="oc-view-traders" style="display:none">
-      <div class="o-label">VERIFIED TRADERS <span class="o-label-action">3 LIVE NOW</span></div>
+      <div class="o-label">ORACLE TRADERS <span class="o-label-action" id="oc-traders-count2"></span></div>
 
-      <!-- oracle_x -->
-      <div class="trader-card">
-        <div class="tc-top">
-          <div class="tc-avatar" style="background:linear-gradient(135deg,#1a0e00,#2a1800);border-color:rgba(245,166,35,.3)">🧿</div>
-          <div class="tc-info">
-            <div class="tc-name">oracle_x <span class="tc-verified">✦</span></div>
-            <div class="tc-handle">@oracle_x · Gold Oracle Rank</div>
-          </div>
-          <div class="tc-os-wrap">
-            <div class="tc-os-num" style="color:var(--green)">87</div>
-            <div class="tc-os-lbl">ORACLE SCORE</div>
-          </div>
-        </div>
-        <div class="live-status-bar lsb-buy">
-          <div class="live-dot ld-buy"></div>
-          <span class="lsb-action-buy">BUYING</span>
-          <span class="lsb-detail">· BTC · LONG · 4H</span>
-          <span class="lsb-time">5 MIN AGO</span>
-        </div>
-        <div class="live-cost-row">🔒 Unlock live status: <strong style="color:var(--gold)">50⬡</strong>/view · Trader earns 40⬡ · Platform: 10⬡</div>
-        <div class="tc-stats">
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--green)">87%</div><div class="tc-stat-lbl">ACCURACY</div></div>
-          <div class="tc-stat"><div class="tc-stat-val">284</div><div class="tc-stat-lbl">FORECASTS</div></div>
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--gold)">Gold</div><div class="tc-stat-lbl">RANK</div></div>
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--text2)">12</div><div class="tc-stat-lbl">FOLLOWERS</div></div>
-        </div>
-        <div class="tc-accuracy">
-          <div class="tca-title">ACCURACY BY ASSET</div>
-          <div class="tca-row"><span class="tca-lbl">BTC</span><div class="tca-bar"><div class="tca-fill" style="width:92%;background:var(--green)"></div></div><span class="tca-pct" style="color:var(--green)">92%</span></div>
-          <div class="tca-row"><span class="tca-lbl">GOLD</span><div class="tca-bar"><div class="tca-fill" style="width:84%;background:var(--gold)"></div></div><span class="tca-pct" style="color:var(--gold)">84%</span></div>
-          <div class="tca-row"><span class="tca-lbl">ETH</span><div class="tca-bar"><div class="tca-fill" style="width:78%;background:var(--cyan)"></div></div><span class="tca-pct" style="color:var(--cyan)">78%</span></div>
-        </div>
-        <div class="tc-actions">
-          <div class="tc-btn tc-btn-sub-done" onclick="showToast('✓ Already subscribed to @oracle_x')">✓ SUBSCRIBED</div>
-          <div class="tc-btn tc-btn-copy" onclick="ocOpenCopy({handle:'oracle_x',icon:'🧿',avatarBg:'linear-gradient(135deg,#1a0e00,#2a1800)',rank:'Gold Oracle · Score: 87',action:'BUYING',asset:'BTC',pos:'LONG',tf:'4H',timeAgo:'5 MIN AGO',mode:'buy'})">👁 COPY TRADE — 50⬡</div>
-        </div>
+      <!-- Filter bar -->
+      <div style="display:flex;gap:6px;padding:0 0 10px;overflow-x:auto;scrollbar-width:none;">
+        <button onclick="tradersFilter('all',this)" class="t-filter-btn active-tf" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid rgba(245,166,35,.4);background:rgba(245,166,35,.1);color:var(--orange);font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">ALL</button>
+        <button onclick="tradersFilter('bull',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">BUYING</button>
+        <button onclick="tradersFilter('bear',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">SELLING</button>
+        <button onclick="tradersFilter('top',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">TOP</button>
+        <button onclick="tradersFilter('subscribed',this)" class="t-filter-btn" style="flex:none;padding:5px 12px;border-radius:9px;border:1px solid #222;background:#111;color:#555;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;">SUBSCRIBED</button>
       </div>
 
-      <!-- diamond_seer -->
-      <div class="trader-card">
-        <div class="tc-top">
-          <div class="tc-avatar" style="background:linear-gradient(135deg,#030e08,#010c06);border-color:rgba(0,229,160,.2)">🌿</div>
-          <div class="tc-info">
-            <div class="tc-name">diamond_seer</div>
-            <div class="tc-handle">@diamond_seer · Diamond Oracle</div>
-          </div>
-          <div class="tc-os-wrap">
-            <div class="tc-os-num" style="color:var(--cyan)">94</div>
-            <div class="tc-os-lbl">ORACLE SCORE</div>
-          </div>
-        </div>
-        <div class="live-status-bar lsb-sell">
-          <div class="live-dot ld-sell"></div>
-          <span class="lsb-action-sell">SELLING</span>
-          <span class="lsb-detail">· GOLD · SHORT · 1D</span>
-          <span class="lsb-time">12 MIN AGO</span>
-        </div>
-        <div class="live-cost-row">🔒 Unlock live status: <strong style="color:var(--gold)">50⬡</strong>/view · Trader earns 40⬡ · Platform: 10⬡</div>
-        <div class="tc-stats">
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--cyan)">94%</div><div class="tc-stat-lbl">ACCURACY</div></div>
-          <div class="tc-stat"><div class="tc-stat-val">512</div><div class="tc-stat-lbl">FORECASTS</div></div>
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--diamond)">Diamond</div><div class="tc-stat-lbl">RANK</div></div>
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--text2)">31</div><div class="tc-stat-lbl">FOLLOWERS</div></div>
-        </div>
-        <div class="tc-accuracy">
-          <div class="tca-title">ACCURACY BY ASSET</div>
-          <div class="tca-row"><span class="tca-lbl">GOLD</span><div class="tca-bar"><div class="tca-fill" style="width:96%;background:var(--gold)"></div></div><span class="tca-pct" style="color:var(--gold)">96%</span></div>
-          <div class="tca-row"><span class="tca-lbl">SPX</span><div class="tca-bar"><div class="tca-fill" style="width:91%;background:var(--green)"></div></div><span class="tca-pct" style="color:var(--green)">91%</span></div>
-          <div class="tca-row"><span class="tca-lbl">BNB</span><div class="tca-bar"><div class="tca-fill" style="width:88%;background:var(--cyan)"></div></div><span class="tca-pct" style="color:var(--cyan)">88%</span></div>
-        </div>
-        <div class="tc-actions">
-          <div class="tc-btn tc-btn-sub" id="oc-sub-diamond" onclick="ocSubscribe('diamond_seer','oc-sub-diamond')">SUBSCRIBE</div>
-          <div class="tc-btn tc-btn-copy" onclick="ocOpenCopy({handle:'diamond_seer',icon:'🌿',avatarBg:'linear-gradient(135deg,#030e08,#010c06)',rank:'Diamond Oracle · Score: 94',action:'SELLING',asset:'GOLD',pos:'SHORT',tf:'1D',timeAgo:'12 MIN AGO',mode:'sell'})">👁 COPY TRADE — 50⬡</div>
-        </div>
-      </div>
-
-      <!-- algo_king -->
-      <div class="trader-card">
-        <div class="tc-top">
-          <div class="tc-avatar" style="background:linear-gradient(135deg,#080020,#100030);border-color:rgba(124,77,255,.2)">⚡</div>
-          <div class="tc-info">
-            <div class="tc-name">algo_king</div>
-            <div class="tc-handle">@algo_king · Silver Seer</div>
-          </div>
-          <div class="tc-os-wrap">
-            <div class="tc-os-num" style="color:var(--purple2)">71</div>
-            <div class="tc-os-lbl">ORACLE SCORE</div>
-          </div>
-        </div>
-        <div class="live-status-bar lsb-watch">
-          <div class="live-dot ld-idle"></div>
-          <span class="lsb-action-watch">WATCHING</span>
-          <span class="lsb-detail" style="color:var(--text3)">· No active position right now</span>
-          <span class="lsb-time">—</span>
-        </div>
-        <div class="live-cost-row">🔒 Unlock live status: <strong style="color:var(--gold)">50⬡</strong>/view · Trader earns 40⬡ · Platform: 10⬡</div>
-        <div class="tc-stats">
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--purple2)">71%</div><div class="tc-stat-lbl">ACCURACY</div></div>
-          <div class="tc-stat"><div class="tc-stat-val">98</div><div class="tc-stat-lbl">FORECASTS</div></div>
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--silver)">Silver</div><div class="tc-stat-lbl">RANK</div></div>
-          <div class="tc-stat"><div class="tc-stat-val" style="color:var(--text2)">8</div><div class="tc-stat-lbl">FOLLOWERS</div></div>
-        </div>
-        <div class="tc-accuracy">
-          <div class="tca-title">ACCURACY BY ASSET</div>
-          <div class="tca-row"><span class="tca-lbl">ETH</span><div class="tca-bar"><div class="tca-fill" style="width:78%;background:var(--purple2)"></div></div><span class="tca-pct" style="color:var(--purple2)">78%</span></div>
-          <div class="tca-row"><span class="tca-lbl">SOL</span><div class="tca-bar"><div class="tca-fill" style="width:68%;background:var(--cyan)"></div></div><span class="tca-pct" style="color:var(--cyan)">68%</span></div>
-          <div class="tca-row"><span class="tca-lbl">BTC</span><div class="tca-bar"><div class="tca-fill" style="width:62%;background:var(--text2)"></div></div><span class="tca-pct" style="color:var(--text2)">62%</span></div>
-        </div>
-        <div class="tc-actions">
-          <div class="tc-btn tc-btn-sub" id="oc-sub-algo" onclick="ocSubscribe('algo_king','oc-sub-algo')">SUBSCRIBE</div>
-          <div class="tc-btn tc-btn-copy" onclick="ocOpenCopy({handle:'algo_king',icon:'⚡',avatarBg:'linear-gradient(135deg,#080020,#100030)',rank:'Silver Seer · Score: 71',action:'WATCHING',asset:'—',pos:'—',tf:'—',timeAgo:'—',mode:'watch'})">👁 VIEW STATUS — 50⬡</div>
-        </div>
-      </div>
-
+      <div id="oc-traders-list2" style="display:flex;flex-direction:column;gap:0;"></div>
     </div><!-- end traders -->
 
   </div><!-- end oracle-scrollable -->
@@ -12107,9 +11910,9 @@ function initSigmaButtons() {
         <div class="bp-row"><span>POOL SIZE</span><span>78,400⬡</span></div>
         <div class="bp-row"><span>PLATFORM FEE</span><span style="color:var(--text3)">10%</span></div>
       </div>
-      <div class="bet-btns">
-        <button class="bbt-yes" onclick="placeBet('YES')">✓ YES — WILL WORK</button>
-        <button class="bbt-no" onclick="placeBet('NO')">✗ NO — WON'T WORK</button>
+      <div class="bet-btns" id="bet-btns-row">
+        <button class="bbt-yes" id="bet-btn-yes" onclick="placeBet('YES')">✓ YES — WILL WORK</button>
+        <button class="bbt-no" id="bet-btn-no" onclick="placeBet('NO')">✗ NO — WON'T WORK</button>
       </div>
     </div>
     <div class="close-modal" onclick="closeOverlay('bet-overlay')">✕ CLOSE</div>
@@ -12381,9 +12184,8 @@ function oracleRenderAll() {
 function oracleRenderTab(name) {
   if (name==='vault')       { oracleRenderVault(); }
   if (name==='quests')      { opRenderQuests(); }
-  if (name==='prophecies')  { opRenderArenaDuels(); renderOracleCallsBets(); renderArenaMkt(); }
+  if (name==='prophecies')  { opRenderArenaDuels(); renderOracleCallsBets(); }
   if (name==='guild')       { opRenderGuild(); }
-  if (name==='traders')     { opRenderTraders(); }
   if (name==='news')        { oracleRenderNews(); oracleUpdateNewsStatus(); }
   if (name==='oracle')      { ocSwitchTab('prophecies'); }
       if (name==='profile')     { opRenderProfile(); }
@@ -13541,7 +13343,7 @@ function bpBuy() {
 //  PROPHECIES ARENA
 // ══════════════════════════
 function opTab(el, tabId) {
-  const tabs = ['op-tab-calls','op-tab-duels','op-tab-mkt'];
+  const tabs = ['op-tab-calls','op-tab-duels'];
   // Show/hide tab content
   tabs.forEach(t => {
     const div = document.getElementById(t);
@@ -13553,7 +13355,6 @@ function opTab(el, tabId) {
     el.classList.add('active');
   }
   if (tabId === 'op-tab-duels') opRenderArenaDuels();
-  if (tabId === 'op-tab-mkt')   renderArenaMkt();
 }
 
 
@@ -13658,7 +13459,6 @@ function opOpenDuelBet(duelId, side) {
   const odds = (d.totalPool / pool * 0.9).toFixed(2);
   const overlay = document.getElementById('bet-overlay');
   if (overlay) {
-    // reuse existing bet modal
     document.getElementById('bet-icon').textContent = d.icon;
     document.getElementById('bet-asset-name').textContent = d.asset;
     document.getElementById('bet-tf-label').textContent = d.tf + ' · ' + d.oracleCall + ' · ARENA DUEL';
@@ -13667,7 +13467,25 @@ function opOpenDuelBet(duelId, side) {
     window._opCurrentDuelId = duelId;
     window._opCurrentDuelSide = side;
     opCurrentBetAmt = 200;
+    // Update odds label to match chosen side
+    const oddsLabel = document.querySelector('.bp-row span:first-child');
+    const bpRows = document.querySelectorAll('.bp-row');
+    if (bpRows[1]) {
+      bpRows[1].querySelector('span:first-child').textContent = 'CURRENT ODDS (' + side.toUpperCase() + ')';
+      bpRows[1].querySelector('span:last-child').textContent = odds + 'x';
+      bpRows[1].querySelector('span:last-child').style.color = side === 'yes' ? 'var(--green)' : 'var(--red)';
+    }
     opUpdateBetDisplay(odds);
+    // Show only the chosen side button, hide the other
+    const yesBtn = document.getElementById('bet-btn-yes');
+    const noBtn = document.getElementById('bet-btn-no');
+    if (side === 'yes') {
+      if (yesBtn) { yesBtn.style.display = 'block'; yesBtn.textContent = '✓ CONFIRM BET — YES'; }
+      if (noBtn) noBtn.style.display = 'none';
+    } else {
+      if (noBtn) { noBtn.style.display = 'block'; noBtn.textContent = '✗ CONFIRM BET — NO'; }
+      if (yesBtn) yesBtn.style.display = 'none';
+    }
     overlay.classList.add('open');
   }
 }
@@ -15044,18 +14862,28 @@ let _vbAsset='', _vbName='', _vbIcon='', _vbTF='', _vbDir='', _vbCardId='';
 let _vbSide = 'yes';
 let _vbStake = 200;
 
-function openVerdictBet(asset, name, icon, tf, dir, cardId) {
+function openVerdictBet(asset, name, icon, tf, dir, cardId, side) {
   _vbAsset=asset; _vbName=name; _vbIcon=icon; _vbTF=tf; _vbDir=dir; _vbCardId=cardId;
-  _vbSide='yes';
-  const iconWrap = document.getElementById('vb-icon-wrap');
+  _vbSide = side || 'yes';
   document.getElementById('vb-icon').textContent = icon;
   document.getElementById('vb-asset-name').textContent = name;
-  document.getElementById('vb-tf-label').textContent = tf + ' · ' + dir.toUpperCase() + ' SIGNAL';
-  document.getElementById('vb-question').textContent = 'Will the ' + name + ' ' + tf + ' ' + dir + ' forecast play out?';
+  const sideLabel = _vbSide === 'yes' ? 'YES' : 'NO';
+  document.getElementById('vb-tf-label').textContent = tf + ' · ' + dir.toUpperCase() + ' · YOUR BET: ' + sideLabel;
+  document.getElementById('vb-question').textContent = _vbSide === 'yes'
+    ? 'Will the ' + name + ' ' + tf + ' ' + dir + ' forecast play out?'
+    : 'You believe the ' + name + ' ' + tf + ' ' + dir + ' forecast will NOT play out';
   document.getElementById('vb-stake-input').value = 200;
   _vbStake = 200;
   updateVerdictPayout();
-  highlightVerdictSide('yes');
+  highlightVerdictSide(_vbSide);
+  // Hide the side toggle buttons — choice already made
+  const yBtn = document.getElementById('vb-yes-btn');
+  const nBtn = document.getElementById('vb-no-btn');
+  if (yBtn) yBtn.style.display = _vbSide === 'yes' ? 'block' : 'none';
+  if (nBtn) nBtn.style.display = _vbSide === 'no' ? 'block' : 'none';
+  // Update confirm button text
+  const confBtn = document.getElementById('vb-confirm-btn');
+  if (confBtn) confBtn.textContent = _vbSide === 'yes' ? '🔮 PLACE VERDICT — YES' : '🔮 PLACE VERDICT — NO';
   document.getElementById('verdict-overlay').classList.add('open');
 }
 function selectVerdictTF(btn, cardId, tf) {
@@ -16625,7 +16453,7 @@ const ASSET_ICONS = { BTC:'₿', ETH:'Ξ', SOL:'◎', GOLD:'⬡', SPX:'📊', NV
    TAB SWITCHING
 ════════════════════════════════════ */
 function ocSwitchTab(tabName) {
-  const tabs = ['prophecies','mybets','leaderboard','market','traders'];
+  const tabs = ['prophecies','mybets','leaderboard','traders'];
   tabs.forEach(t => {
     document.getElementById('oc-ot-' + t).classList.toggle('active', t === tabName);
     const v = document.getElementById('oc-view-' + t);
@@ -16688,17 +16516,23 @@ function ocRenderLeaderboard() {
 }
 
 function ocRenderOracleTraders() {
-  // Sync subscribe buttons in oracle traders tab
-  const subs = OC_EXT.subscribedTraders;
-  document.querySelectorAll('#oc-view-traders .tc-btn-sub').forEach(btn => {
-    const onclick = btn.getAttribute('onclick') || '';
-    const m = onclick.match(/ocSubscribe\('([^']+)'/);
-    if (m && subs.includes(m[1])) {
-      btn.textContent = '✓ SUBSCRIBED';
-      btn.className = 'tc-btn tc-btn-sub-done';
-      btn.onclick = () => showToast('✓ Already subscribed to @'+m[1]);
-    }
-  });
+  // Unified traders: render into oc-view-traders using same logic as op-traders
+  const list2 = document.getElementById('oc-traders-list2');
+  const cnt2 = document.getElementById('oc-traders-count2');
+  if (!list2) return;
+  // Reuse renderTradersList logic but target the oracle tab container
+  const origList = document.getElementById('traders-list');
+  const origCnt = document.getElementById('traders-count');
+  // Temporarily swap target IDs, render, then swap back
+  if (origList) origList.id = '_traders-list-tmp';
+  if (origCnt) origCnt.id = '_traders-count-tmp';
+  list2.id = 'traders-list';
+  cnt2.id = 'traders-count';
+  renderTradersList();
+  list2.id = 'oc-traders-list2';
+  cnt2.id = 'oc-traders-count2';
+  if (origList) origList.id = 'traders-list';
+  if (origCnt) origCnt.id = 'traders-count';
 }
 
 /* ════════════════════════════════════
