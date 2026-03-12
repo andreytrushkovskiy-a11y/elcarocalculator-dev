@@ -88,6 +88,35 @@ body {
   min-height:100vh; padding:20px 16px 60px;
 }
 
+/* ── LIVE PRICE TOGGLE ── */
+.live-toggle {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:6px;
+  border:1px solid #333; background:transparent;
+  color:#555; font-size:8px; font-weight:800;
+  letter-spacing:1px; cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  transition:all .2s;
+}
+.live-toggle.active {
+  border-color:var(--green); color:var(--green);
+  background:rgba(0,200,150,.08);
+  box-shadow:0 0 8px rgba(0,200,150,.2);
+}
+.live-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:#333; display:inline-block;
+  transition:background .2s;
+}
+.live-toggle.active .live-dot {
+  background:var(--green);
+  animation:livePulse 1.5s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(0,200,150,.4); }
+  50% { opacity:.7; box-shadow:0 0 0 4px rgba(0,200,150,0); }
+}
+
 /* ── MODE SWITCHER ── */
 .mode-switcher {
   display:flex; gap:4px; margin-bottom:0;
@@ -4135,6 +4164,11 @@ input[type=range]::-webkit-slider-thumb {
       <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     </button>
 
+    <button class="mode-btn" id="mode-pnl-nav" onclick="setMode('pnl')"
+      title="PnL Tracker" style="flex:0 0 42px;padding:8px 0;justify-content:center;">
+      <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </button>
+
   </div>
 
 </div>
@@ -4190,7 +4224,12 @@ input[type=range]::-webkit-slider-thumb {
       <div class="edit-panel" id="edit-panel">
         <div class="edit-row">
           <div class="edit-field">
-            <div class="edit-label">SPOT PRICE</div>
+            <div class="edit-label" style="display:flex;align-items:center;gap:6px;">
+              SPOT PRICE
+              <button class="live-toggle" id="live-toggle-btn" onclick="toggleLivePrice()" title="Auto-update spot price from Deribit every 5s">
+                <span class="live-dot" id="live-dot"></span> LIVE
+              </button>
+            </div>
             <input type="number" class="edit-input" id="inp-spot" placeholder="66752" step="1" oninput="liveCalc()">
           </div>
           <div class="edit-field">
@@ -4329,6 +4368,7 @@ input[type=range]::-webkit-slider-thumb {
             <button class="viz-tab" id="viz-tab-4" onclick="setViz(4)"
               title="Available after calculating 5 different expiry dates"
               style="opacity:0.35;cursor:not-allowed;">TIMELINE</button>
+            <button class="viz-tab" onclick="setViz(5)" id="viz-tab-5">PAYOFF</button>
           </div>
         </div>
 
@@ -4363,6 +4403,14 @@ input[type=range]::-webkit-slider-thumb {
             σ corridor across next 5 expiry dates · Y-axis = breakeven price · shaded area = where price WON'T be
           </div>
           <div id="v4-wrap" style="position:relative;"></div>
+        </div>
+
+        <!-- VIZ 5: Payoff Diagram -->
+        <div id="viz-5" style="display:none;">
+          <div style="font-size:9px;color:rgba(255,255,255,.3);margin-bottom:12px;font-weight:500;">
+            Straddle buyer payoff · Green = profit zone · Red = loss zone · Dashed = sigma levels
+          </div>
+          <div id="v5-payoff"></div>
         </div>
 
         <!-- TIMELINE POST BUTTON -->
@@ -5581,10 +5629,55 @@ let currentViz   = 1;
 
 // Per-asset stored values
 const assetData = {
-  BTC: { spot:'', call:'', put:'', round:'1000' },
-  ETH: { spot:'', call:'', put:'', round:'50'   },
-  SOL: { spot:'', call:'', put:'', round:'1'    },
+  BTC: { spot:'', call:'', put:'', round:'1000', live:false },
+  ETH: { spot:'', call:'', put:'', round:'50',   live:false },
+  SOL: { spot:'', call:'', put:'', round:'1',    live:false },
 };
+
+// ═══════════════════ LIVE PRICE ═══════════════════
+let livePriceInterval = null;
+const DERIBIT_INDEX_MAP = { BTC:'btc_usd', ETH:'eth_usd', SOL:'sol_usd' };
+
+function toggleLivePrice() {
+  const d = assetData[currentAsset];
+  if (!d || !DERIBIT_INDEX_MAP[currentAsset]) return;
+  d.live = !d.live;
+  const btn = document.getElementById('live-toggle-btn');
+  if (btn) btn.classList.toggle('active', d.live);
+  if (d.live) startLivePrice(); else stopLivePrice();
+}
+
+async function fetchLiveSpot() {
+  const idx = DERIBIT_INDEX_MAP[currentAsset];
+  if (!idx) return;
+  try {
+    const res = await deribitCall('public/get_index_price', { index_name: idx });
+    if (res && res.index_price) {
+      const inp = document.getElementById('inp-spot');
+      if (inp) { inp.value = Math.round(res.index_price * 100) / 100; liveCalc(); }
+    }
+  } catch(e) { console.warn('Live price fetch failed:', e); }
+}
+
+function startLivePrice() {
+  stopLivePrice();
+  fetchLiveSpot();
+  livePriceInterval = setInterval(fetchLiveSpot, 5000);
+}
+
+function stopLivePrice() {
+  if (livePriceInterval) { clearInterval(livePriceInterval); livePriceInterval = null; }
+}
+
+function updateLiveToggleUI() {
+  const btn = document.getElementById('live-toggle-btn');
+  const isLiveAsset = !!DERIBIT_INDEX_MAP[currentAsset];
+  if (btn) {
+    btn.style.display = isLiveAsset ? 'inline-flex' : 'none';
+    const d = assetData[currentAsset];
+    btn.classList.toggle('active', !!(d && d.live));
+  }
+}
 
 // ═══════════════════ ASSET SWITCHING ═══════════════════
 function setAsset(sym) {
@@ -5638,6 +5731,12 @@ function setAsset(sym) {
   document.getElementById('inp-round').value = d.round;
 
   liveCalc();
+
+  // Live price: stop old, start new if active
+  stopLivePrice();
+  updateLiveToggleUI();
+  const ad = assetData[sym];
+  if (ad && ad.live && DERIBIT_INDEX_MAP[sym]) startLivePrice();
 
   // Load dates
   availableExpiries = [];
@@ -6105,7 +6204,7 @@ function generateFutureExpiries(n) {
 
 function setViz(n) {
   currentViz = n;
-  [1,2,3,4].forEach(i => {
+  [1,2,3,4,5].forEach(i => {
     document.getElementById('viz-' + i).style.display = i === n ? 'block' : 'none';
     document.getElementById('viz-tab-' + i).classList.toggle('active', i === n);
   });
@@ -6248,6 +6347,126 @@ function renderAllViz() {
   renderViz2();
   renderViz3();
   renderViz4();
+  renderPayoffDiagram();
+}
+
+// ── VIZ 5: PAYOFF DIAGRAM ──
+function renderPayoffDiagram() {
+  const wrap = document.getElementById('v5-payoff');
+  if (!wrap || !lastResult) return;
+  const { spot, straddle, be_lo, be_hi, levels } = lastResult;
+  if (!spot || !straddle) { wrap.innerHTML = ''; return; }
+
+  const W = 600, H = 250, PAD = { top:20, right:30, bottom:35, left:55 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
+
+  const xMin = spot - straddle * 3.5;
+  const xMax = spot + straddle * 3.5;
+  const xRange = xMax - xMin;
+  const toX = v => PAD.left + ((v - xMin) / xRange) * chartW;
+
+  // PnL = |price - spot| - straddle (long straddle buyer)
+  const pnl = p => Math.abs(p - spot) - straddle;
+  const maxPnl = pnl(xMax);
+  const minPnl = -straddle;
+  const yPad = Math.abs(maxPnl - minPnl) * 0.1;
+  const yMin = minPnl - yPad;
+  const yMax = maxPnl + yPad;
+  const yRange = yMax - yMin;
+  const toY = v => PAD.top + chartH - ((v - yMin) / yRange) * chartH;
+
+  // Build path
+  const steps = 200;
+  const dx = xRange / steps;
+  let pathD = '';
+  let fillAbove = '', fillBelow = '';
+  const zeroY = toY(0);
+
+  // Main PnL line
+  const pts = [];
+  for (let i = 0; i <= steps; i++) {
+    const px = xMin + i * dx;
+    const py = pnl(px);
+    pts.push({ x: toX(px), y: toY(py), py });
+  }
+  pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+
+  // Green fill (above zero) and red fill (below zero)
+  let greenPath = '', redPath = '';
+  // Left profit zone: xMin to be_lo
+  const beLoX = toX(be_lo), beHiX = toX(be_hi);
+  // Green left: from xMin up, clipped at zero
+  greenPath += `M${PAD.left},${zeroY.toFixed(1)}`;
+  for (let i = 0; i <= steps; i++) {
+    const px = xMin + i * dx;
+    const py = pnl(px);
+    if (py > 0) greenPath += ` L${toX(px).toFixed(1)},${toY(py).toFixed(1)}`;
+  }
+  greenPath += ` L${(PAD.left + chartW).toFixed(1)},${zeroY.toFixed(1)} Z`;
+
+  // Red: below zero
+  redPath += `M${beLoX.toFixed(1)},${zeroY.toFixed(1)}`;
+  for (let i = 0; i <= steps; i++) {
+    const px = xMin + i * dx;
+    const py = pnl(px);
+    if (py <= 0) redPath += ` L${toX(px).toFixed(1)},${toY(py).toFixed(1)}`;
+  }
+  redPath += ` L${beHiX.toFixed(1)},${zeroY.toFixed(1)} Z`;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;" preserveAspectRatio="xMidYMid meet">`;
+
+  // Grid lines
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const v = yMin + (yRange * i / yTicks);
+    const y = toY(v);
+    svg += `<line x1="${PAD.left}" y1="${y}" x2="${PAD.left + chartW}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+    svg += `<text x="${PAD.left - 8}" y="${y + 3}" text-anchor="end" font-size="8" fill="rgba(255,255,255,.3)" font-family="JetBrains Mono,monospace">${v >= 0 ? '+' : ''}${v >= 1000 || v <= -1000 ? (v/1000).toFixed(1)+'k' : Math.round(v)}</text>`;
+  }
+
+  // Zero line
+  svg += `<line x1="${PAD.left}" y1="${zeroY}" x2="${PAD.left + chartW}" y2="${zeroY}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>`;
+
+  // Fills
+  svg += `<path d="${greenPath}" fill="rgba(0,200,150,.12)" stroke="none"/>`;
+  svg += `<path d="${redPath}" fill="rgba(255,59,92,.12)" stroke="none"/>`;
+
+  // Sigma level dashed lines
+  const sigColors = {1:'#f5c800', 2:'#ff6a00', 3:'#e03b3b'};
+  levels.filter(l => l.show).forEach(l => {
+    [l.lo, l.hi].forEach(v => {
+      if (v >= xMin && v <= xMax) {
+        const x = toX(v);
+        svg += `<line x1="${x}" y1="${PAD.top}" x2="${x}" y2="${PAD.top + chartH}" stroke="${sigColors[l.k] || '#888'}" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>`;
+        svg += `<text x="${x}" y="${PAD.top - 4}" text-anchor="middle" font-size="7" fill="${sigColors[l.k] || '#888'}" opacity=".7">${l.k}σ</text>`;
+      }
+    });
+  });
+
+  // Spot vertical line
+  const spotX = toX(spot);
+  svg += `<line x1="${spotX}" y1="${PAD.top}" x2="${spotX}" y2="${PAD.top + chartH}" stroke="var(--orange)" stroke-width="1.5" opacity=".6"/>`;
+  svg += `<text x="${spotX}" y="${H - 5}" text-anchor="middle" font-size="8" fill="var(--orange)" font-weight="600">SPOT</text>`;
+
+  // Breakeven markers
+  [be_lo, be_hi].forEach((v, i) => {
+    if (v >= xMin && v <= xMax) {
+      const x = toX(v);
+      svg += `<circle cx="${x}" cy="${zeroY}" r="3.5" fill="var(--green)" stroke="#000" stroke-width="1"/>`;
+      svg += `<text x="${x}" y="${H - 5}" text-anchor="middle" font-size="7" fill="var(--green)" font-weight="600">${fmtPrice(v)}</text>`;
+    }
+  });
+
+  // PnL line
+  svg += `<path d="${pathD}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>`;
+
+  // Max loss label at bottom of V
+  const maxLossY = toY(-straddle);
+  svg += `<text x="${spotX}" y="${maxLossY + 14}" text-anchor="middle" font-size="8" fill="var(--red)" font-weight="600">-${fmtPrice(straddle)}</text>`;
+
+  svg += '</svg>';
+  wrap.innerHTML = svg;
 }
 
 // ── VIZ 1: RANGE BAR (SVG, no overflow) ──
@@ -7081,6 +7300,7 @@ let avgLastResult = null;
 function setMode(mode) {
   const toolsModes   = ['tools','portfolio','agent','avg','sizer','funding','fgi','geo','gpr','econ','ai-settings'];
   const marketModes  = ['market','chart','heatmap-stock','heatmap-crypto','calendar','news'];
+  const isPnlMode    = mode === 'pnl';
   const isToolsMode  = toolsModes.includes(mode);
   const isMarketMode = marketModes.includes(mode);
 
@@ -7091,6 +7311,7 @@ function setMode(mode) {
   _active('mode-market-group', isMarketMode);
   _active('mode-guild-nav',    mode === 'guild');
   _active('mode-elcaro-nav',   mode === 'elcaro');
+  _active('mode-pnl-nav',     isPnlMode);
 
   // Show/hide helpers
   const show = id => { const el=document.getElementById(id); if(el) el.style.display='block'; };
@@ -7103,7 +7324,8 @@ function setMode(mode) {
     'geo-section','gpr-section','econ-section','ai-settings-section',
     'portfolio-section','agent-section',
     'chart-section','heatmap-stock-section','heatmap-crypto-section',
-    'calendar-section','news-section','guild-section','elcaro-section'
+    'calendar-section','news-section','guild-section','elcaro-section',
+    'pnl-section'
   ];
   allSections.forEach(hide);
 
@@ -7132,6 +7354,7 @@ function setMode(mode) {
     news:            'news-section',
     guild:           'guild-section',
     elcaro:          'elcaro-section',
+    pnl:             'pnl-section',
   };
   if (sectionMap[mode]) {
     const secEl = document.getElementById(sectionMap[mode]);
@@ -7152,6 +7375,7 @@ function setMode(mode) {
   if (mode === 'econ') econLoad();
   if (mode === 'news' && !window._newsTabSet) { setNewsTab('top'); window._newsTabSet = true; }
   if (mode === 'portfolio') pfRenderAll();
+  if (mode === 'pnl') pnlRenderAll();
   if (mode === 'agent') { agentInitialized = false; agentInit(); }
 }
 
@@ -14741,6 +14965,309 @@ function guildCreate() {
   showToast(guildSelectedEmblem + ' Guild "' + name + '" created! You are Guild Master 👑');
 }
 </script>
+
+<!-- ══════════════════════════════════════════════
+     PNL TRACKER JS
+══════════════════════════════════════════════ -->
+<script>
+const PNL_STORAGE_KEY = 'elcaro_pnl_trades';
+
+function pnlLoad() {
+  try { return JSON.parse(localStorage.getItem(PNL_STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function pnlSave(trades) {
+  localStorage.setItem(PNL_STORAGE_KEY, JSON.stringify(trades));
+}
+
+function pnlRenderAll() {
+  pnlRenderStats();
+  pnlRenderOpen();
+  pnlRenderClosed();
+}
+
+function pnlRenderStats() {
+  const trades = pnlLoad();
+  const closed = trades.filter(t => t.status === 'closed');
+  const open = trades.filter(t => t.status === 'open');
+
+  const totalPnl = closed.reduce((s, t) => s + (t.pnl || 0), 0);
+  const wins = closed.filter(t => t.pnl > 0);
+  const losses = closed.filter(t => t.pnl <= 0);
+  const winRate = closed.length ? ((wins.length / closed.length) * 100).toFixed(0) : '—';
+  const avgWin = wins.length ? (wins.reduce((s, t) => s + t.pnl, 0) / wins.length).toFixed(2) : '—';
+  const avgLoss = losses.length ? (losses.reduce((s, t) => s + t.pnl, 0) / losses.length).toFixed(2) : '—';
+
+  const pnlColor = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  const pnlSign = totalPnl >= 0 ? '+' : '';
+
+  const el = document.getElementById('pnl-stats');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="background:var(--bg3);border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">TOTAL PNL</div>
+      <div style="font-size:16px;font-weight:900;color:${pnlColor};font-family:'JetBrains Mono',monospace;">${pnlSign}$${Math.abs(totalPnl).toFixed(2)}</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">WIN RATE</div>
+      <div style="font-size:16px;font-weight:900;color:var(--text);font-family:'JetBrains Mono',monospace;">${winRate}${winRate !== '—' ? '%' : ''}</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:10px 12px;text-align:center;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">TRADES</div>
+      <div style="font-size:16px;font-weight:900;color:var(--text);font-family:'JetBrains Mono',monospace;">${open.length} / ${closed.length}</div>
+      <div style="font-size:7px;color:var(--text2);">open / closed</div>
+    </div>
+  `;
+}
+
+async function pnlRenderOpen() {
+  const trades = pnlLoad().filter(t => t.status === 'open');
+  const el = document.getElementById('pnl-open-list');
+  const countEl = document.getElementById('pnl-open-count');
+  if (countEl) countEl.textContent = trades.length;
+  if (!el) return;
+
+  if (!trades.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:11px;">No open trades. Tap + ADD TRADE to start.</div>';
+    return;
+  }
+
+  let html = '';
+  for (const t of trades) {
+    let livePrice = null;
+    try { livePrice = await pfGetLivePrice(t.asset); } catch(e) {}
+    const unrealPnl = livePrice ? pnlCalcPnl(t, livePrice) : null;
+    const pnlColor = unrealPnl !== null ? (unrealPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text2)';
+    const pnlSign = unrealPnl !== null ? (unrealPnl >= 0 ? '+' : '') : '';
+    const pnlText = unrealPnl !== null ? `${pnlSign}$${Math.abs(unrealPnl).toFixed(2)}` : '...';
+    const pnlPct = (unrealPnl !== null && t.entryPrice) ? ` (${pnlSign}${((unrealPnl / (t.entryPrice * t.entryQty)) * 100).toFixed(1)}%)` : '';
+    const dirColor = t.type === 'long' ? 'var(--green)' : 'var(--red)';
+    const livePriceStr = livePrice ? fmtPrice(livePrice) : '—';
+
+    html += `
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #1e1e1e;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;font-weight:900;color:var(--text);font-family:'JetBrains Mono',monospace;">$${t.asset}</span>
+          <span style="font-size:8px;font-weight:800;letter-spacing:1px;color:${dirColor};background:${t.type === 'long' ? 'rgba(0,200,150,.1)' : 'rgba(255,59,92,.1)'};padding:2px 6px;border-radius:4px;">${t.type.toUpperCase()}</span>
+        </div>
+        <div style="font-size:14px;font-weight:900;color:${pnlColor};font-family:'JetBrains Mono',monospace;">${pnlText}<span style="font-size:9px;opacity:.7;">${pnlPct}</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-bottom:8px;">
+        <span>Entry: ${fmtPrice(t.entryPrice)} × ${t.entryQty}</span>
+        <span>Live: ${livePriceStr}</span>
+      </div>
+      ${t.notes ? `<div style="font-size:8px;color:var(--text2);margin-bottom:8px;font-style:italic;">${t.notes}</div>` : ''}
+      <div style="display:flex;gap:6px;">
+        <button onclick="pnlCloseTrade('${t.id}')" style="flex:1;padding:6px;border-radius:6px;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);color:var(--green);font-size:9px;font-weight:800;cursor:pointer;font-family:inherit;">CLOSE</button>
+        <button onclick="pnlDeleteTrade('${t.id}')" style="padding:6px 10px;border-radius:6px;background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);color:var(--red);font-size:9px;font-weight:800;cursor:pointer;font-family:inherit;">DEL</button>
+      </div>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function pnlRenderClosed() {
+  const trades = pnlLoad().filter(t => t.status === 'closed');
+  const el = document.getElementById('pnl-closed-list');
+  const countEl = document.getElementById('pnl-closed-count');
+  if (countEl) countEl.textContent = trades.length;
+  if (!el) return;
+
+  if (!trades.length) {
+    el.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text2);font-size:11px;">No closed trades yet.</div>';
+    return;
+  }
+
+  let html = '';
+  trades.slice().reverse().forEach(t => {
+    const pnlColor = t.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    const pnlSign = t.pnl >= 0 ? '+' : '';
+    const dirColor = t.type === 'long' ? 'var(--green)' : 'var(--red)';
+    html += `
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:6px;border:1px solid #1a1a1a;opacity:.8;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace;">$${t.asset}</span>
+          <span style="font-size:7px;font-weight:800;color:${dirColor};letter-spacing:.5px;">${t.type.toUpperCase()}</span>
+        </div>
+        <span style="font-size:12px;font-weight:900;color:${pnlColor};font-family:'JetBrains Mono',monospace;">${pnlSign}$${Math.abs(t.pnl).toFixed(2)}</span>
+      </div>
+      <div style="font-size:8px;color:var(--text2);margin-top:4px;">
+        ${fmtPrice(t.entryPrice)} → ${fmtPrice(t.exitPrice)} · ${t.entryQty} qty
+        ${t.pnlPct !== undefined ? ` · ${pnlSign}${t.pnlPct.toFixed(1)}%` : ''}
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function pnlCalcPnl(trade, currentPrice) {
+  const dir = trade.type === 'long' ? 1 : -1;
+  return dir * (currentPrice - trade.entryPrice) * trade.entryQty;
+}
+
+function pnlShowAddModal() {
+  const modal = document.getElementById('pnl-modal-overlay');
+  if (modal) modal.style.display = 'flex';
+  // Set default date to today
+  const dateInp = document.getElementById('pnl-inp-date');
+  if (dateInp && !dateInp.value) dateInp.value = new Date().toISOString().split('T')[0];
+}
+
+function pnlCloseModal() {
+  const modal = document.getElementById('pnl-modal-overlay');
+  if (modal) modal.style.display = 'none';
+}
+
+function pnlAddTrade() {
+  const asset = (document.getElementById('pnl-inp-asset').value || '').toUpperCase().trim();
+  const type = document.getElementById('pnl-inp-type').value;
+  const entryPrice = parseFloat(document.getElementById('pnl-inp-price').value);
+  const entryQty = parseFloat(document.getElementById('pnl-inp-qty').value);
+  const entryDate = document.getElementById('pnl-inp-date').value;
+  const notes = (document.getElementById('pnl-inp-notes').value || '').trim();
+
+  if (!asset || !entryPrice || !entryQty) {
+    showToast('Fill asset, price and quantity');
+    return;
+  }
+
+  const trade = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    asset, type, entryPrice, entryQty, entryDate,
+    exitPrice: null, exitDate: null, pnl: null, pnlPct: null,
+    status: 'open', notes
+  };
+
+  const trades = pnlLoad();
+  trades.push(trade);
+  pnlSave(trades);
+  pnlCloseModal();
+  pnlRenderAll();
+  showToast('Trade added: $' + asset + ' ' + type.toUpperCase());
+
+  // Clear inputs
+  document.getElementById('pnl-inp-price').value = '';
+  document.getElementById('pnl-inp-qty').value = '';
+  document.getElementById('pnl-inp-notes').value = '';
+}
+
+function pnlCloseTrade(id) {
+  const exitPrice = prompt('Enter exit price:');
+  if (!exitPrice || isNaN(parseFloat(exitPrice))) return;
+
+  const trades = pnlLoad();
+  const trade = trades.find(t => t.id === id);
+  if (!trade) return;
+
+  trade.exitPrice = parseFloat(exitPrice);
+  trade.exitDate = new Date().toISOString().split('T')[0];
+  trade.pnl = pnlCalcPnl(trade, trade.exitPrice);
+  trade.pnlPct = (trade.pnl / (trade.entryPrice * trade.entryQty)) * 100;
+  trade.status = 'closed';
+
+  pnlSave(trades);
+  pnlRenderAll();
+  const sign = trade.pnl >= 0 ? '+' : '';
+  showToast(`Trade closed: ${sign}$${Math.abs(trade.pnl).toFixed(2)}`);
+}
+
+function pnlDeleteTrade(id) {
+  if (!confirm('Delete this trade?')) return;
+  const trades = pnlLoad().filter(t => t.id !== id);
+  pnlSave(trades);
+  pnlRenderAll();
+  showToast('Trade deleted');
+}
+</script>
+
+<!-- ══════════════════════════════════════════════
+     PNL TRACKER SECTION
+══════════════════════════════════════════════ -->
+<div id="pnl-section" style="display:none;max-width:900px;margin:0 auto;padding-bottom:20px;">
+
+  <!-- PNL HEADER -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1.8px;color:#888;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:8px;">
+        <span style="color:var(--green);font-size:14px;">$</span> PNL TRACKER
+      </div>
+      <button onclick="pnlShowAddModal()" style="padding:7px 14px;border-radius:8px;background:linear-gradient(135deg,#ff6500,#f5a623);border:none;color:#000;font-weight:800;font-size:10px;cursor:pointer;font-family:inherit;letter-spacing:.5px;">+ ADD TRADE</button>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div id="pnl-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;"></div>
+  </div>
+
+  <!-- Open Trades -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+      <span style="display:inline-block;width:3px;height:14px;background:var(--green);border-radius:2px;"></span>
+      OPEN POSITIONS
+      <span id="pnl-open-count" style="margin-left:auto;background:rgba(0,200,150,.12);color:var(--green);border:1px solid rgba(0,200,150,.25);border-radius:20px;padding:2px 8px;font-size:8px;font-weight:800;"></span>
+    </div>
+    <div id="pnl-open-list"></div>
+  </div>
+
+  <!-- Closed Trades -->
+  <div class="card">
+    <div onclick="document.getElementById('pnl-closed-list').style.display=document.getElementById('pnl-closed-list').style.display==='none'?'block':'none'" style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+      <span style="display:inline-block;width:3px;height:14px;background:var(--red);border-radius:2px;"></span>
+      CLOSED TRADES
+      <span id="pnl-closed-count" style="margin-left:auto;background:rgba(255,59,92,.12);color:var(--red);border:1px solid rgba(255,59,92,.25);border-radius:20px;padding:2px 8px;font-size:8px;font-weight:800;"></span>
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--text2);fill:none;stroke-width:2.5;"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="pnl-closed-list" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD TRADE MODAL
+══════════════════════════════════════════════ -->
+<div id="pnl-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9999;backdrop-filter:blur(4px);justify-content:center;align-items:center;">
+  <div style="background:#131313;border:1px solid #2a2a2a;border-radius:16px;padding:20px;width:calc(100% - 32px);max-width:400px;margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--orange);font-family:'Space Mono',monospace;">ADD TRADE</div>
+      <button onclick="pnlCloseModal()" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+
+    <div style="display:grid;gap:10px;">
+      <div>
+        <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">ASSET</div>
+        <input type="text" id="pnl-inp-asset" class="edit-input" placeholder="BTC" style="text-transform:uppercase;" value="BTC">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">DIRECTION</div>
+          <select id="pnl-inp-type" class="edit-input">
+            <option value="long">LONG</option>
+            <option value="short">SHORT</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">ENTRY DATE</div>
+          <input type="date" id="pnl-inp-date" class="edit-input">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">ENTRY PRICE</div>
+          <input type="number" id="pnl-inp-price" class="edit-input" placeholder="65000" step="any">
+        </div>
+        <div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">QUANTITY</div>
+          <input type="number" id="pnl-inp-qty" class="edit-input" placeholder="0.1" step="any">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);margin-bottom:4px;">NOTES (optional)</div>
+        <input type="text" id="pnl-inp-notes" class="edit-input" placeholder="Breakout trade...">
+      </div>
+      <button onclick="pnlAddTrade()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#ff6500,#f5a623);border:none;color:#000;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;letter-spacing:1px;margin-top:4px;">ADD TRADE</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════
      GUILD SECTION
