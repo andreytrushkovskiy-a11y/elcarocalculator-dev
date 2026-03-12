@@ -1689,7 +1689,7 @@ div[class*="tgme"], div[id*="tgme"] { display:none !important; }
 #oracle-panel .ts-lbl { font-size:8px; color:#3a3a3a; font-family:'Space Mono',monospace; margin-top:2px; }
 #oracle-panel .trader-actions { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #222; }
 #oracle-panel .sub-btn { flex:1; background:rgba(124,77,255,.12); border:1px solid rgba(124,77,255,.3); border-radius:12px; padding:11px; font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:#b388ff; cursor:pointer; }
-#oracle-panel .sub-btn.subbed { background:rgba(124,77,255,.25); }
+#oracle-panel .sub-btn.subbed { background:rgba(245,166,35,.2); border-color:rgba(245,166,35,.5); color:var(--orange); }
 #oracle-panel .copy-btn { flex:1; background:linear-gradient(135deg,rgba(0,229,160,.15),rgba(0,229,160,.08)); border:1px solid rgba(0,229,160,.3); border-radius:12px; padding:11px; font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:#00e5a0; cursor:pointer; }
 #oracle-panel .live-status { margin:0 14px 0; padding:9px 12px; background:rgba(0,229,160,.05); border-radius:10px; border:1px solid rgba(0,229,160,.15); display:flex; align-items:center; gap:8px; font-size:11px; font-family:'Space Mono',monospace; }
 #oracle-panel .ls-dot { width:7px; height:7px; border-radius:50%; animation:pulse 1s infinite; flex-shrink:0; }
@@ -2477,7 +2477,7 @@ div[class*="tgme"], div[id*="tgme"] { display:none !important; }
 .verdict-tf-row { display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap; }
 .verdict-tf-btn { font-size:9px; padding:4px 9px; border-radius:7px; font-family:'Space Mono',monospace; font-weight:700; cursor:pointer; border:1px solid #2a2a2a; background:#111; color:#666; transition:all .15s; }
 .verdict-tf-btn.active { background:rgba(0,229,255,.15); border-color:rgba(0,229,255,.4); color:var(--cyan); }
-.verdict-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.verdict-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
 .verdict-btn-yes { background:linear-gradient(135deg,rgba(0,230,118,.2),rgba(0,230,118,.08)); border:1px solid rgba(0,230,118,.4); border-radius:12px; padding:11px; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:#00e676; cursor:pointer; }
 .verdict-btn-no { background:linear-gradient(135deg,rgba(255,71,87,.2),rgba(255,71,87,.08)); border:1px solid rgba(255,71,87,.4); border-radius:12px; padding:11px; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:#ff4757; cursor:pointer; }
 .verdict-my-bet { margin-top:8px; padding:8px 12px; background:rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.2); border-radius:10px; font-size:10px; color:var(--cyan); font-family:'Space Mono',monospace; display:none; }
@@ -11131,7 +11131,7 @@ function initSigmaButtons() {
       <div class="op-screen" id="op-prophecies" style="display:none;">
         <div class="scrollable-op">
 
-        <div class="slabel">ORACLE VERDICT ARENA</div>
+        <div class="slabel" style="padding-top:6px;padding-bottom:4px;">ORACLE VERDICT ARENA</div>
         <div class="om-tabs">
           <div class="om-tab active" onclick="opTab(this,'op-tab-calls')">ORACLE CALLS</div>
           <div class="om-tab" onclick="opTab(this,'op-tab-duels')">ARENA DUELS</div>
@@ -11140,7 +11140,7 @@ function initSigmaButtons() {
         <!-- ORACLE CALLS -->
         <div id="op-tab-calls">
 
-    <div class="slabel">ORACLE VERDICT <span style="font-size:8px;color:#555;font-family:'Space Mono',monospace;font-weight:400;margin-left:6px;">STAKE OC · WIN FROM POOL</span></div>
+    <div class="slabel" style="padding-top:6px;">ORACLE VERDICT <span style="font-size:8px;color:#555;font-family:'Space Mono',monospace;font-weight:400;margin-left:6px;">STAKE OC · WIN FROM POOL</span></div>
 
     <!-- VERDICT CARD 1: BTC -->
     <div class="verdict-item">
@@ -11587,7 +11587,7 @@ function initSigmaButtons() {
     <div id="oc-view-leaderboard" style="display:none">
       <div class="o-label">ORACLE SCORE LEADERBOARD</div>
 
-      <div class="lb-row">
+      <div class="lb-row" onclick="revealTraderStatus('diamond_seer')" style="cursor:pointer">
         <div class="lb-pos" style="color:var(--gold)">#1</div>
         <div class="lb-avatar" style="background:linear-gradient(135deg,#030e08,#010c06)">🌿</div>
         <div class="lb-info">
@@ -11597,7 +11597,7 @@ function initSigmaButtons() {
         <div class="lb-score-wrap"><div class="lb-score" style="color:var(--cyan)">94</div><div class="lb-score-lbl">SCORE</div></div>
       </div>
 
-      <div class="lb-row">
+      <div class="lb-row" onclick="revealTraderStatus('oracle_x')" style="cursor:pointer">
         <div class="lb-pos" style="color:var(--silver)">#2</div>
         <div class="lb-avatar" style="background:linear-gradient(135deg,#1a0e00,#2a1800)">🧿</div>
         <div class="lb-info">
@@ -11607,7 +11607,7 @@ function initSigmaButtons() {
         <div class="lb-score-wrap"><div class="lb-score" style="color:var(--green)">87</div><div class="lb-score-lbl">SCORE</div></div>
       </div>
 
-      <div class="lb-row">
+      <div class="lb-row" onclick="revealTraderStatus('silver_prophet')" style="cursor:pointer">
         <div class="lb-pos" style="color:var(--bronze)">#3</div>
         <div class="lb-avatar" style="background:var(--bg3)">🌙</div>
         <div class="lb-info">
@@ -11617,7 +11617,7 @@ function initSigmaButtons() {
         <div class="lb-score-wrap"><div class="lb-score" style="color:var(--silver)">79</div><div class="lb-score-lbl">SCORE</div></div>
       </div>
 
-      <div class="lb-row">
+      <div class="lb-row" onclick="revealTraderStatus('algo_king')" style="cursor:pointer">
         <div class="lb-pos" style="color:var(--text2)">#4</div>
         <div class="lb-avatar" style="background:var(--bg3)">⚡</div>
         <div class="lb-info">
@@ -11778,7 +11778,7 @@ function initSigmaButtons() {
           </div>
         </div>
       </div>
-      <button class="bp-buy-btn" onclick="showToast('🎫 Battle Pass Season 1 — $9.99 for 100 reward levels!')">🎫 UPGRADE PASS — $9.99/SEASON</button>
+      <button class="bp-buy-btn" id="bp-upgrade-btn" onclick="upgradeBattlePass()">🎫 UPGRADE PASS — $9.99/SEASON</button>
     </div>
 
     <!-- STREAK INSURANCE -->
@@ -11906,12 +11906,12 @@ function initSigmaButtons() {
       <div style="font-size:9px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:10px;">SELECT BET AMOUNT:</div>
       <div class="bet-amount-row">
         <div class="bet-amt-pill" onclick="selectBetAmt(this,'100')">100⬡</div>
-        <div class="bet-amt-pill sel" onclick="selectBetAmt(this,'500')">500⬡</div>
+        <div class="bet-amt-pill sel" onclick="selectBetAmt(this,'200')">200⬡</div>
+        <div class="bet-amt-pill" onclick="selectBetAmt(this,'500')">500⬡</div>
         <div class="bet-amt-pill" onclick="selectBetAmt(this,'1000')">1,000⬡</div>
-        <div class="bet-amt-pill" onclick="selectBetAmt(this,'2500')">2,500⬡</div>
       </div>
       <div class="bet-payout">
-        <div class="bp-row"><span>YOUR BET</span><span id="bet-amt-display">500⬡</span></div>
+        <div class="bp-row"><span>YOUR BET</span><span id="bet-amt-display">200⬡</span></div>
         <div class="bp-row"><span>CURRENT ODDS (YES)</span><span style="color:var(--green)">1.62x</span></div>
         <div class="bp-row"><span>POTENTIAL PAYOUT</span><span style="color:var(--green)" id="bet-payout-val">810⬡</span></div>
         <div class="bp-row"><span>POOL SIZE</span><span>78,400⬡</span></div>
@@ -12208,6 +12208,8 @@ function renderOracleCallsBets() {
     const lblEl = document.getElementById(id+'-bet-label');
     if (betEl) betEl.style.display = 'block';
     if (lblEl) lblEl.textContent = (bet.stake||bet.amount||'?').toLocaleString()+'⬡ on '+(bet.side||'?').toUpperCase()+' · '+(bet.tf||'');
+    // Hide YES/NO buttons for already-bet cards
+    if (betEl) { const btnsDiv = betEl.parentElement.querySelector('.verdict-btns'); if (btnsDiv) btnsDiv.style.display='none'; }
   });
 }
 
@@ -13360,7 +13362,22 @@ function opQuestItemHTML(q) {
 
 function bpBuy() {
   _opBpPremium = true;
-  showToast('⭐ PREMIUM BATTLE PASS activated! All premium rewards unlocked!');
+  OC_EXT.battlePassPremium = true;
+  // Unlock premium features
+  OC_EXT.skinsUnlocked = true;
+  OC_EXT.framesUnlocked = true;
+  // Give Diamond chest as premium reward
+  OC.inventory.diamond = (OC.inventory.diamond||0) + 1;
+  oracleRenderInventory();
+  ocSave();
+  showToast('⭐ PREMIUM BATTLE PASS activated! SKINS + FRAMES + 💎 Diamond Chest unlocked!');
+  // Update button
+  var btn = document.getElementById('bp-upgrade-btn');
+  if (btn) { btn.textContent = '✓ PREMIUM ACTIVE'; btn.style.background = 'linear-gradient(135deg,rgba(192,132,252,.3),rgba(192,132,252,.1))'; btn.style.color = '#c084fc'; btn.style.border = '1px solid rgba(192,132,252,.4)'; }
+}
+function upgradeBattlePass() {
+  if (OC_EXT.battlePassPremium) { showToast('✓ Premium already active!'); return; }
+  bpBuy();
 }
 
 // ══════════════════════════
@@ -13491,6 +13508,10 @@ function opOpenDuelBet(duelId, side) {
     window._opCurrentDuelId = duelId;
     window._opCurrentDuelSide = side;
     opCurrentBetAmt = 200;
+    // Reset bet pills to 200 default
+    document.querySelectorAll('.bet-amt-pill').forEach(p => p.classList.remove('sel'));
+    const pills = document.querySelectorAll('.bet-amt-pill');
+    if (pills[1]) pills[1].classList.add('sel');
     // Update odds label to match chosen side
     const oddsLabel = document.querySelector('.bp-row span:first-child');
     const bpRows = document.querySelectorAll('.bp-row');
@@ -13503,11 +13524,14 @@ function opOpenDuelBet(duelId, side) {
     // Show only the chosen side button, hide the other
     const yesBtn = document.getElementById('bet-btn-yes');
     const noBtn = document.getElementById('bet-btn-no');
+    // Center the single confirm button
+    var btnsRow = document.getElementById('bet-btns-row');
+    if (btnsRow) btnsRow.style.justifyContent = 'center';
     if (side === 'yes') {
-      if (yesBtn) { yesBtn.style.display = 'block'; yesBtn.textContent = '✓ CONFIRM BET — YES'; }
+      if (yesBtn) { yesBtn.style.display = 'block'; yesBtn.textContent = '✓ CONFIRM BET — YES'; yesBtn.style.width = '100%'; }
       if (noBtn) noBtn.style.display = 'none';
     } else {
-      if (noBtn) { noBtn.style.display = 'block'; noBtn.textContent = '✗ CONFIRM BET — NO'; }
+      if (noBtn) { noBtn.style.display = 'block'; noBtn.textContent = '✗ CONFIRM BET — NO'; noBtn.style.width = '100%'; }
       if (yesBtn) yesBtn.style.display = 'none';
     }
     overlay.classList.add('open');
@@ -14452,9 +14476,9 @@ function guildDistributeTreasury() {
 }
 
 function guildInvite() {
-  const link = 'https://t.me/elcarocalculator_bot?start=guild_oracle_covenant';
+  var link = (guildState && guildState.inviteLink) || 'https://t.me/elcarocalculator_bot?start=guild_oracle_covenant';
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(link).then(()=>showToast('🔗 Guild invite link copied! Share with friends to recruit members'));
+    navigator.clipboard.writeText(link).then(function() { showToast('🔗 Guild invite link copied! Share with friends to recruit members'); });
   } else {
     showToast('🔗 Invite: '+link);
   }
@@ -14529,8 +14553,8 @@ function sendChat() {
 function opRenderTraders() { renderTradersList(); }
 function openCopyModal(trader) { revealTraderStatus(trader); }
 function confirmCopy() {
-  if (OC.coins < 50) { showToast('⚠️ Need 50⬡ to unlock trader status'); return; }
-  OC.coins -= 50; oracleRenderVaultCoins();
+  if (OC.coins < 500) { showToast('⚠️ Need 500⬡ to unlock trader status'); return; }
+  OC.coins -= 500; oracleRenderVaultCoins();
   closeOverlay('copy-overlay');
   showToast(`👁 Status unlocked! @${opCtTrader} is ${opCtAction} ${opCtAsset} ${opCtTF}`);
   opAdvanceQuest('wq4');
@@ -14855,12 +14879,13 @@ function placeBet(side) {
   const key = opCurrentBetAsset + '_' + opCurrentBetTF;
   if (!OC_EXT.verdictBets) OC_EXT.verdictBets = {};
   OC_EXT.verdictBets[key] = { side, stake: opCurrentBetAmt, asset: opCurrentBetAsset, tf: opCurrentBetTF };
-  // Show on card
+  // Show on card and hide YES/NO buttons
   const cardId = opCurrentBetAsset.toLowerCase();
   const betEl = document.getElementById(cardId+'-my-bet');
   const lblEl = document.getElementById(cardId+'-bet-label');
   if (betEl) betEl.style.display = 'block';
   if (lblEl) lblEl.textContent = opCurrentBetAmt.toLocaleString()+'⬡ on '+side+' · '+opCurrentBetTF;
+  if (betEl) { const btnsDiv = betEl.parentElement.querySelector('.verdict-btns'); if (btnsDiv) btnsDiv.style.display='none'; }
   oracleRenderVaultCoins();
   closeOverlay('bet-overlay');
   opAdvanceQuest('wq2');
@@ -14960,7 +14985,7 @@ document.addEventListener('keydown', e => {
 
 <!-- ══ TRADER STATUS MODAL ══ -->
 <div class="overlay" id="trader-status-overlay" onclick="if(event.target===this)closeOverlay('trader-status-overlay')">
-  <div class="overlay-sheet">
+  <div class="overlay-sheet" style="max-width:380px;margin:0 auto;padding-top:10px;">
     <div style="font-size:10px;color:#555;font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:12px;">ORACLE TRADER STATUS</div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
       <div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #333;" id="ts-avatar">🧿</div>
@@ -14980,10 +15005,10 @@ document.addEventListener('keydown', e => {
           <div style="text-align:center;"><div style="font-size:11px;color:#ffd700;font-weight:700;font-family:'Space Mono',monospace">ASSET + TF</div><div style="font-size:8px;color:#555;font-family:'Space Mono',monospace;">POSITION</div></div>
           <div style="text-align:center;"><div style="font-size:11px;color:#c084fc;font-weight:700;font-family:'Space Mono',monospace">LONG/SHORT</div><div style="font-size:8px;color:#555;font-family:'Space Mono',monospace;">DIRECTION</div></div>
         </div>
-        <div style="font-size:10px;color:#666;font-family:'Space Mono',monospace;margin-bottom:4px;">COST: <span style="color:#fff;font-weight:700;">50⬡</span> per unlock</div>
+        <div style="font-size:10px;color:#666;font-family:'Space Mono',monospace;margin-bottom:4px;">COST: <span style="color:#fff;font-weight:700;">500⬡</span> per unlock</div>
         <div style="font-size:9px;color:#444;font-family:'Space Mono',monospace;">Trader earns <span id="ts-trader-earn">40⬡</span> per view</div>
       </div>
-      <button onclick="unlockTraderStatus()" style="width:100%;background:linear-gradient(135deg,rgba(0,229,160,.2),rgba(0,229,160,.08));border:1px solid rgba(0,229,160,.4);border-radius:13px;padding:14px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#00e5a0;cursor:pointer;">👁 UNLOCK STATUS — 50⬡</button>
+      <button onclick="unlockTraderStatus()" style="width:100%;background:linear-gradient(135deg,rgba(0,229,160,.2),rgba(0,229,160,.08));border:1px solid rgba(0,229,160,.4);border-radius:13px;padding:14px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#00e5a0;cursor:pointer;">👁 UNLOCK STATUS — 500⬡</button>
     </div>
     <!-- REVEALED STATE -->
     <div id="ts-revealed-view" style="display:none;">
@@ -15126,11 +15151,13 @@ function confirmVerdictBet() {
   OC.coins -= _vbStake; oracleRenderVaultCoins();
   const key = _vbCardId + '_' + _vbTF;
   OC_EXT.verdictBets[key] = { side:_vbSide, stake:_vbStake, asset:_vbAsset, tf:_vbTF };
-  // Show bet on card
+  // Show bet on card and hide YES/NO buttons
   const betEl = document.getElementById(_vbCardId+'-my-bet');
   const lblEl = document.getElementById(_vbCardId+'-bet-label');
   if (betEl) betEl.style.display='block';
   if (lblEl) lblEl.textContent = _vbStake+'⬡ on '+(_vbSide==='yes'?'YES ✓':'NO ✗')+' · '+_vbTF;
+  // Hide verdict buttons for this card
+  if (betEl) { const btnsDiv = betEl.parentElement.querySelector('.verdict-btns'); if (btnsDiv) btnsDiv.style.display='none'; }
   closeOverlay('verdict-overlay');
   showToast('🔮 Verdict placed! '+_vbStake+'⬡ on '+_vbSide.toUpperCase()+' · '+_vbAsset+' '+_vbTF);
   opAdvanceQuest && opAdvanceQuest('wq2');
@@ -15315,8 +15342,8 @@ function tradersFilter(f, el) {
 }
 
 function renderTradersList() {
-  const list = document.getElementById('traders-list');
-  const cnt  = document.getElementById('traders-count');
+  const list = document.getElementById('oc-traders-list2') || document.getElementById('traders-list');
+  const cnt  = document.getElementById('oc-traders-count2') || document.getElementById('traders-count');
   if (!list) return;
   let entries = Object.entries(TRADER_DATA);
   if (_tradersFilter === 'bull')       entries = entries.filter(([,d]) => d.action === 'BUYING');
@@ -15353,7 +15380,7 @@ function renderTradersList() {
         </div>
       </div>
       <div class="live-status">${statusLine}</div>
-      <div class="live-cost">Unlock live status: 50⬡ per view · Trader earns ${d.earn}⬡</div>
+      <div class="live-cost">Unlock live status: 500⬡ per view · Trader earns ${d.earn}⬡</div>
       <div class="trader-stats">
         <div class="ts-item"><div class="ts-val" style="color:${d.statusColor}">${d.accuracy}</div><div class="ts-lbl">ACCURACY</div></div>
         <div class="ts-item"><div class="ts-val">${d.forecasts.toLocaleString()}</div><div class="ts-lbl">FORECASTS</div></div>
@@ -15364,7 +15391,7 @@ function renderTradersList() {
           ${isSubbed ? '✓ SUBSCRIBED' : 'SUBSCRIBE'}
         </button>
         <button class="copy-reveal-btn" onclick="revealTraderStatus('${handle}')">
-          👁 ${isRevealed ? 'VIEW STATUS' : 'COPY STATUS — 50⬡'}
+          👁 ${isRevealed ? 'VIEW STATUS' : 'COPY STATUS — 500⬡'}
         </button>
         ${isMirrored ? '<div style="font-size:8px;color:var(--cyan);font-family:\'Space Mono\',monospace;text-align:center;margin-top:4px;">🔔 MIRRORING</div>' : ''}
       </div>
@@ -15414,9 +15441,9 @@ function unlockTraderStatus() {
   if (!OC_EXT.subscribedTraders.includes(handle)) {
     showToast('⚠ Subscribe to @'+handle+' first'); return;
   }
-  if (OC.coins < 50) { showToast('⚠ Need 50⬡ to unlock trader status'); return; }
+  if (OC.coins < 500) { showToast('⚠ Need 500⬡ to unlock trader status'); return; }
   const d = TRADER_DATA[handle];
-  OC.coins -= 50;
+  OC.coins -= 500;
   if (d) OC.coins += d.earn;
   OC_EXT.revealedStatuses[handle] = true;
   oracleRenderVaultCoins(); ocSave();
@@ -15706,15 +15733,82 @@ function renderCollectibleCards() {
     const info = CARD_INFO[sym];
     if (!info) return '';
     if (!c) return `<div class="ac-card common ac-card-locked" onclick="showToast('🔒 ${info.name} card — earn from chests!')"><div class="ac-card-icon" style="opacity:.3">❓</div><div class="ac-card-sym" style="color:#444">${sym}</div><div class="ac-card-rarity" style="color:#333">LOCKED</div></div>`;
-    return `<div class="ac-card ${c.rarity}" onclick="showToast('${info.icon} ${info.name} · ${c.rarity.toUpperCase()} · Level ${c.level} · Used ${c.uses}× in forecasts')">
+    const boostPct = {common:5,rare:10,epic:15,legendary:25}[c.rarity]||5;
+    const sellValue = {common:50,rare:150,epic:400,legendary:1000}[c.rarity]||50;
+    return `<div class="ac-card ${c.rarity}" onclick="openCardAction('${sym}')">
       <div class="ac-card-glow"></div>
       <div class="ac-card-icon">${info.icon}</div>
       <div class="ac-card-sym" style="color:${info.color}">${sym}</div>
       <div class="ac-card-rarity" style="color:${rarityColor[c.rarity]}">${c.rarity.toUpperCase()}</div>
       <div class="ac-card-level" style="color:#555">LVL ${c.level}</div>
-      <div class="ac-card-uses" style="color:#444">${c.uses}× USED</div>
+      <div style="font-size:7px;color:#444;font-family:'Space Mono',monospace">+${boostPct}% ACC · ${sellValue}⬡</div>
     </div>`;
   }).join('');
+}
+
+function openCardAction(sym) {
+  var c = OC_EXT.collectedCards[sym];
+  if (!c) return;
+  var CARD_INFO = {BTC:{icon:'₿',name:'BITCOIN'},ETH:{icon:'Ξ',name:'ETHEREUM'},GOLD:{icon:'⬡',name:'GOLD'},SOL:{icon:'◎',name:'SOLANA'},SPX:{icon:'📊',name:'S&P 500'},NVDA:{icon:'N',name:'NVIDIA'},TSLA:{icon:'T',name:'TESLA'},XRP:{icon:'✕',name:'RIPPLE'}};
+  var info = CARD_INFO[sym] || {icon:'?',name:sym};
+  var boostPct = {common:5,rare:10,epic:15,legendary:25}[c.rarity]||5;
+  var sellValue = {common:50,rare:150,epic:400,legendary:1000}[c.rarity]||50;
+  var id = 'card-action-modal';
+  var el = document.getElementById(id);
+  if (el) el.remove();
+  el = document.createElement('div');
+  el.id = id; el.className = 'guild-overlay';
+  el.onclick = function(e) { if (e.target===el) guildCloseModal(id); };
+  el.innerHTML = '<div class="guild-sheet" style="max-width:360px;margin:0 auto;">' +
+    '<div class="gsheet-handle"></div>' +
+    '<div class="gsheet-title">'+info.icon+' '+info.name+' CARD</div>' +
+    '<div class="gsheet-sub">'+c.rarity.toUpperCase()+' · LEVEL '+c.level+' · USED '+c.uses+'×</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">' +
+      '<button onclick="useCardBoost(\''+sym+'\')" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(0,230,118,.3);background:rgba(0,230,118,.06);color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:\'Syne\',sans-serif;">📈 USE IN FORECAST — +'+boostPct+'% Accuracy Boost</button>' +
+      '<button onclick="levelUpCard(\''+sym+'\')" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(192,132,252,.3);background:rgba(192,132,252,.06);color:var(--purple2);font-size:11px;font-weight:700;cursor:pointer;font-family:\'Syne\',sans-serif;">⬆ LEVEL UP — Cost '+(c.level*100)+'⬡</button>' +
+      '<button onclick="sellCard(\''+sym+'\')" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,215,0,.3);background:rgba(255,215,0,.06);color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:\'Syne\',sans-serif;">💰 SELL — '+sellValue+'⬡</button>' +
+    '</div>' +
+    '<button onclick="guildCloseModal(\''+id+'\')" style="width:100%;padding:11px;border-radius:11px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:\'Syne\',sans-serif;margin-top:8px;">CLOSE</button>' +
+    '</div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function() { el.classList.add('open'); });
+}
+
+function useCardBoost(sym) {
+  var c = OC_EXT.collectedCards[sym];
+  if (!c) return;
+  var boostPct = {common:5,rare:10,epic:15,legendary:25}[c.rarity]||5;
+  c.uses++;
+  OC.accuracy = Math.min(100, (OC.accuracy||0) + Math.round(boostPct/2));
+  ocSave();
+  guildCloseModal('card-action-modal');
+  showToast('📈 '+sym+' card used! Accuracy +'+Math.round(boostPct/2)+'%');
+  renderCollectibleCards();
+}
+
+function levelUpCard(sym) {
+  var c = OC_EXT.collectedCards[sym];
+  if (!c) return;
+  var cost = c.level * 100;
+  if (OC.coins < cost) { showToast('⚠ Need '+cost+'⬡ to level up'); return; }
+  OC.coins -= cost;
+  c.level++;
+  oracleRenderVaultCoins(); ocSave();
+  guildCloseModal('card-action-modal');
+  showToast('⬆ '+sym+' card leveled up to LVL '+c.level+'!');
+  renderCollectibleCards();
+}
+
+function sellCard(sym) {
+  var c = OC_EXT.collectedCards[sym];
+  if (!c) return;
+  var sellValue = {common:50,rare:150,epic:400,legendary:1000}[c.rarity]||50;
+  OC.coins += sellValue;
+  delete OC_EXT.collectedCards[sym];
+  oracleRenderVaultCoins(); ocSave();
+  guildCloseModal('card-action-modal');
+  showToast('💰 Sold '+sym+' card for '+sellValue+'⬡!');
+  renderCollectibleCards();
 }
 
 // ── ORACLE CARD VISUAL ────────────────────────────
@@ -15846,10 +15940,24 @@ function guildCreate() {
   guildState.members = 1;
   guildState.rank = 99;
   guildState.isLeader = true;
+  // Generate unique invite link
+  var guildSlug = name.toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,20);
+  guildState.inviteCode = guildSlug + '_' + Date.now().toString(36);
+  guildState.inviteLink = 'https://t.me/elcarocalculator_bot?start=guild_' + guildState.inviteCode;
   ocSave();
   guildCloseModal('guild-create-modal');
   guildSystemMsg(guildSelectedEmblem + ' Guild "' + name + '" has been created! You are Guild Master 👑');
-  showToast(guildSelectedEmblem + ' Guild "' + name + '" created! You are Guild Master 👑');
+  // Show invite link in a copyable toast
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(guildState.inviteLink).then(function() {
+      showToast(guildSelectedEmblem + ' Guild created! Invite link copied to clipboard!');
+    });
+  } else {
+    showToast(guildSelectedEmblem + ' Guild "' + name + '" created! You are Guild Master 👑');
+  }
+  // Update guild header if exists
+  var gNameEl = document.querySelector('.guild-info .guild-name');
+  if (gNameEl) gNameEl.textContent = guildSelectedEmblem + ' ' + name;
 }
 
 function guildFollowMember() {
@@ -16422,11 +16530,11 @@ function pnlDeleteTrade(id) {
       <div class="treasury-cell"><span class="tc-icon">📦</span><div class="tc-val" id="gtc-chests">3</div><div class="tc-lbl">CHESTS</div></div>
       <div class="treasury-cell"><span class="tc-icon">📄</span><div class="tc-val" id="gtc-forecasts">7</div><div class="tc-lbl">FORECASTS</div></div>
     </div>
-    <button onclick="guildAlertMembers()" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(245,166,35,.3);background:rgba(245,166,35,.06);color:var(--orange);font-size:10px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-bottom:6px;letter-spacing:.5px;">
-      📢 ALERT ALL MEMBERS — Treasury opens in 1 hour!
+    <button onclick="guildAlertMembers()" style="width:calc(100% - 24px);margin:0 12px 6px;padding:9px;border-radius:10px;border:1px solid rgba(245,166,35,.3);background:rgba(245,166,35,.06);color:var(--orange);font-size:9px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.5px;display:block;">
+      📢 ALERT ALL MEMBERS
     </button>
-    <button class="treasury-cta" id="guild-treasury-btn" onclick="guildDistributeTreasury()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff6500,#f5a623);color:#000;font-size:11px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.5px;">
-      🔮 OPEN TREASURY — Distribute to All Members
+    <button class="treasury-cta" id="guild-treasury-btn" onclick="guildDistributeTreasury()" style="width:calc(100% - 24px);margin:0 12px;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff6500,#f5a623);color:#000;font-size:10px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.5px;display:block;">
+      🔮 OPEN TREASURY
     </button>
   </div>
 
@@ -16652,12 +16760,13 @@ function pnlDeleteTrade(id) {
       <div style="display:flex;justify-content:space-between;font-size:9px;font-family:'Space Mono',monospace;margin-bottom:14px;"><span id="oc-bet-yes-pct" style="color:var(--green);"></span><span id="oc-bet-no-pct" style="color:var(--red);"></span></div>
       <div style="display:flex;gap:5px;margin-bottom:11px;">
         <div class="bet-amt" onclick="ocSelectAmt(this,100)"  style="flex:1;background:#181818;border:1px solid #252525;border-radius:9px;padding:8px 2px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;color:#666;">100⬡</div>
-        <div class="bet-amt selected" onclick="ocSelectAmt(this,500)"  style="flex:1;background:rgba(245,166,35,.08);border:1px solid var(--orange);border-radius:9px;padding:8px 2px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;color:var(--orange);">500⬡</div>
+        <div class="bet-amt selected" onclick="ocSelectAmt(this,200)"  style="flex:1;background:rgba(245,166,35,.08);border:1px solid var(--orange);border-radius:9px;padding:8px 2px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;color:var(--orange);">200⬡</div>
+        <div class="bet-amt" onclick="ocSelectAmt(this,500)"  style="flex:1;background:#181818;border:1px solid #252525;border-radius:9px;padding:8px 2px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;color:#666;">500⬡</div>
         <div class="bet-amt" onclick="ocSelectAmt(this,1000)" style="flex:1;background:#181818;border:1px solid #252525;border-radius:9px;padding:8px 2px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;color:#666;">1K⬡</div>
         <div class="bet-amt" onclick="ocSelectAmt(this,5000)" style="flex:1;background:#181818;border:1px solid #252525;border-radius:9px;padding:8px 2px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;color:#666;">5K⬡</div>
       </div>
       <div style="background:#181818;border-radius:12px;padding:12px;margin-bottom:11px;border:1px solid #222;">
-        <div style="display:flex;justify-content:space-between;font-size:9px;font-family:'Space Mono',monospace;margin-bottom:5px;"><span style="color:#444;">YOUR BET</span><span id="oc-calc-bet" style="color:#ccc;">500⬡</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;font-family:'Space Mono',monospace;margin-bottom:5px;"><span style="color:#444;">YOUR BET</span><span id="oc-calc-bet" style="color:#ccc;">200⬡</span></div>
         <div style="display:flex;justify-content:space-between;font-size:9px;font-family:'Space Mono',monospace;margin-bottom:5px;"><span style="color:#444;">ODDS</span><span id="oc-calc-odds" style="color:#ffd700;">2.41x</span></div>
         <div style="display:flex;justify-content:space-between;font-size:9px;font-family:'Space Mono',monospace;margin-bottom:5px;"><span style="color:#444;">TOTAL POOL</span><span id="oc-calc-pool" style="color:#444;"></span></div>
         <div style="border-top:1px solid #222;margin:7px 0;"></div>
@@ -16872,7 +16981,7 @@ function ocFilterMarket(btn, type) {
 ════════════════════════════════════ */
 function ocOpenBet(data) {
   ocState.currentBet = data;
-  ocState.betAmt = 500;
+  ocState.betAmt = 200;
 
   // Сбрасываем выбор суммы
   document.querySelectorAll('#oc-modal-bet .bet-amt').forEach(a => a.classList.remove('selected'));
