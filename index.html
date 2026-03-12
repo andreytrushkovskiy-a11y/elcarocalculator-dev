@@ -4144,10 +4144,6 @@ input[type=range]::-webkit-slider-thumb {
       <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     </button>
 
-    <button class="mode-btn" id="mode-pnl-nav" onclick="setMode('pnl')"
-      title="PnL Tracker" style="flex:0 0 42px;padding:8px 0;justify-content:center;">
-      <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-    </button>
 
   </div>
 
@@ -4504,6 +4500,13 @@ input[type=range]::-webkit-slider-thumb {
       <div class="tlb-icon" style="font-size:28px;">🔑</div>
       <div class="tlb-name" style="color:var(--diamond);">API</div>
       <div class="tlb-sub">Anthropic Key</div>
+    </div>
+
+    <!-- PNL TRACKER -->
+    <div onclick="setMode('pnl')" class="tools-launcher-btn" style="background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(34,197,94,.03));border:1px solid rgba(34,197,94,.2);">
+      <div class="tlb-icon" style="font-size:28px;">💲</div>
+      <div class="tlb-name" style="color:#22c55e;">PNL</div>
+      <div class="tlb-sub">Trade Tracker</div>
     </div>
 
   </div>
@@ -7291,7 +7294,7 @@ function setMode(mode) {
   _active('mode-market-group', isMarketMode);
   _active('mode-guild-nav',    mode === 'guild');
   _active('mode-elcaro-nav',   mode === 'elcaro');
-  _active('mode-pnl-nav',     isPnlMode);
+  // PNL nav button moved to tools grid
 
   // Show/hide helpers
   const show = id => { const el=document.getElementById(id); if(el) el.style.display='block'; };
