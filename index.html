@@ -4206,15 +4206,15 @@ input[type=range]::-webkit-slider-thumb {
                 <span class="live-dot" id="live-dot"></span> LIVE
               </button>
             </div>
-            <input type="number" class="edit-input" id="inp-spot" placeholder="66752" step="1" oninput="liveCalc()">
+            <input type="number" class="edit-input" id="inp-spot" placeholder="66752" step="1" min="0" oninput="liveCalc()">
           </div>
           <div class="edit-field">
             <div class="edit-label">CALL PRICE</div>
-            <input type="number" class="edit-input" id="inp-call" placeholder="3133" step="1" oninput="liveCalc()">
+            <input type="number" class="edit-input" id="inp-call" placeholder="3133" step="1" min="0" oninput="liveCalc()">
           </div>
           <div class="edit-field">
             <div class="edit-label">PUT PRICE</div>
-            <input type="number" class="edit-input" id="inp-put" placeholder="2885" step="1" oninput="liveCalc()">
+            <input type="number" class="edit-input" id="inp-put" placeholder="2885" step="1" min="0" oninput="liveCalc()">
           </div>
         </div>
         <div id="straddle-preview" style="display:none;" class="straddle-preview">
@@ -5474,9 +5474,9 @@ input[type=range]::-webkit-slider-thumb {
   <!-- Step nav -->
   <div class="agent-steps-nav" id="agent-steps-nav">
     <button class="agent-step-btn active" id="agent-nav-0" onclick="agentGoStep(0)">◆ Portfolio</button>
-    <button class="agent-step-btn" id="agent-nav-1" onclick="agentGoStep(1)" disabled>◈ Analysis</button>
-    <button class="agent-step-btn" id="agent-nav-2" onclick="agentGoStep(2)" disabled>◇ Signals</button>
-    <button class="agent-step-btn" id="agent-nav-3" onclick="agentGoStep(3)" disabled>▣ Plan</button>
+    <button class="agent-step-btn" id="agent-nav-1" onclick="agentGoStep(1)" disabled title="Complete previous step first">◈ Analysis</button>
+    <button class="agent-step-btn" id="agent-nav-2" onclick="agentGoStep(2)" disabled title="Complete previous step first">◇ Signals</button>
+    <button class="agent-step-btn" id="agent-nav-3" onclick="agentGoStep(3)" disabled title="Complete previous step first">▣ Plan</button>
     <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
       <span style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text2);">BUDGET</span>
       <span id="agent-budget-display" style="font-family:JetBrains Mono,monospace;font-size:14px;font-weight:900;color:var(--orange);">$1,000,000</span>
@@ -5783,8 +5783,17 @@ function toggleEdit() {
   if (!isOpen) setTimeout(() => document.getElementById('inp-spot').focus(), 50);
 }
 
+// ═══════════════════ DEBOUNCE UTILITY ═══════════════════
+function _debounce(fn, ms) {
+  let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); };
+}
+const _debouncedLiveCalc = _debounce(() => _liveCalcCore(), 80);
+const _debouncedAvgCalc  = _debounce(() => _avgLiveCalcCore(), 80);
+
+function liveCalc() { _debouncedLiveCalc(); }
+
 // ═══════════════════ LIVE CALC ═══════════════════
-function liveCalc() {
+function _liveCalcCore() {
   const call = parseFloat(document.getElementById('inp-call').value) || 0;
   const put  = parseFloat(document.getElementById('inp-put').value)  || 0;
   const prev = document.getElementById('straddle-preview');
@@ -7312,6 +7321,9 @@ function setMode(mode) {
   ];
   allSections.forEach(hide);
 
+  // Stop live price interval when leaving straddle mode (prevent memory leak)
+  if (mode !== 'straddle' && typeof stopLivePrice === 'function') stopLivePrice();
+
   // Straddle
   const layout = document.querySelector('.layout');
   if (layout) layout.style.display = mode === 'straddle' ? 'grid' : 'none';
@@ -7472,9 +7484,10 @@ function avgRemoveLeg(idx) {
 }
 
 // ── Live preview (just update multiply indicators) ──
-function avgLiveCalc() {
+function _avgLiveCalcCore() {
   // Could show a mini preview; for now just validate
 }
+function avgLiveCalc() { _debouncedAvgCalc(); }
 
 // ── Main calculate ──
 function avgCalculate() {
@@ -8306,13 +8319,13 @@ const PF_COLORS = [
 ];
 
 // ── State ──
-let pfAssets  = JSON.parse(localStorage.getItem('elcaro_pf_assets') || '[]');
-let pfAlerts  = JSON.parse(localStorage.getItem('elcaro_pf_alerts') || '[]');
+let pfAssets; try { pfAssets = JSON.parse(localStorage.getItem('elcaro_pf_assets') || '[]'); } catch(e) { pfAssets = []; }
+let pfAlerts; try { pfAlerts = JSON.parse(localStorage.getItem('elcaro_pf_alerts') || '[]'); } catch(e) { pfAlerts = []; }
 let pfLivePrices = {};  // sym → price
 
 function pfSave() {
-  localStorage.setItem('elcaro_pf_assets', JSON.stringify(pfAssets));
-  localStorage.setItem('elcaro_pf_alerts', JSON.stringify(pfAlerts));
+  try { localStorage.setItem('elcaro_pf_assets', JSON.stringify(pfAssets)); } catch(e) {}
+  try { localStorage.setItem('elcaro_pf_alerts', JSON.stringify(pfAlerts)); } catch(e) {}
 }
 
 // ── Auto-detect asset type ──
@@ -10103,7 +10116,11 @@ function agentRenderPlan(plan) {
 
 
 
+let _fgiLastLoad = 0;
+let _fgiCached = false;
 async function fgiLoad() {
+  // Cache for 30 minutes
+  if (_fgiCached && Date.now() - _fgiLastLoad < 30*60*1000) return;
   const valEl  = document.getElementById('fgi-value');
   const lblEl  = document.getElementById('fgi-label');
   const histEl = document.getElementById('fgi-history');
@@ -10138,6 +10155,7 @@ async function fgiLoad() {
       </div>`;
     }).join('');
     if (srcEl) srcEl.textContent = 'Source: alternative.me · Crypto Fear & Greed Index';
+    _fgiCached = true; _fgiLastLoad = Date.now();
   } catch(e) {
     valEl.textContent = '?';
     lblEl.textContent = 'Failed to load';
@@ -10365,7 +10383,8 @@ function fgiRenderGauge(val) {
    ANTHROPIC API KEY CONFIG
 ═══════════════════════════════════════════════ */
 (function() {
-  const key = localStorage.getItem('elcaro_api_key') || '';
+  let key = '';
+  try { key = localStorage.getItem('elcaro_api_key') || ''; } catch(e) {}
   if (key) window.ELCARO_API_KEY = key;
   setTimeout(() => { updateKeyStatus(); initSigmaButtons(); }, 200);
 })();
@@ -10376,7 +10395,7 @@ function elcaroSetApiKey(key) {
   if (!key) { showToast('⚠ Paste your API key first'); return; }
   if (!key.startsWith('sk-ant-')) { showToast('⚠ Key must start with sk-ant-'); return; }
   window.ELCARO_API_KEY = key;
-  localStorage.setItem('elcaro_api_key', key);
+  try { localStorage.setItem('elcaro_api_key', key); } catch(e) {}
   updateKeyStatus();
   const inp = document.getElementById('ai-key-input');
   if (inp) inp.value = '';
@@ -10385,7 +10404,7 @@ function elcaroSetApiKey(key) {
 
 function elcaroClearApiKey() {
   window.ELCARO_API_KEY = '';
-  localStorage.removeItem('elcaro_api_key');
+  try { localStorage.removeItem('elcaro_api_key'); } catch(e) {}
   updateKeyStatus();
   const inp = document.getElementById('ai-key-input');
   if (inp) inp.value = '';
@@ -10556,9 +10575,12 @@ function geoRender() {
 /* ══════════════════════════════════════════════
    GPR INDEX  –  Geopolitical Risk estimate
 ═══════════════════════════════════════════════ */
+let _gprLastLoad = 0;
+let _gprCached = false;
 async function gprLoad() {
   const vEl=document.getElementById('gpr-value'), lEl=document.getElementById('gpr-label');
   if (!vEl) return;
+  if (_gprCached && Date.now() - _gprLastLoad < 30*60*1000) return;
   if (!window.ELCARO_API_KEY) {
     vEl.textContent='🔑'; lEl.textContent='API key required';
     const zEl=document.getElementById('gpr-zone');
@@ -10607,6 +10629,7 @@ async function gprLoad() {
             '</div></div>';
         }).join('');
       }
+      _gprCached = true; _gprLastLoad = Date.now();
       return;
     }
   } catch(e){ console.warn('gprLoad',e); }
@@ -13051,13 +13074,13 @@ async function loadTelegramNews() {
     if (posts.length) {
       list.innerHTML = _renderTgCards(posts);
       // Cache latest post ID for embed fallback
-      if (posts[0].postId) localStorage.setItem('tg_equtr_latest', posts[0].postId);
+      if (posts[0].postId) try { localStorage.setItem('tg_equtr_latest', posts[0].postId); } catch(e) {}
       return;
     }
   }
 
   // Fallback: use Telegram embed widgets (always works, no CORS)
-  const cachedLatest = parseInt(localStorage.getItem('tg_equtr_latest')) || 9089;
+  let cachedLatest = 9089; try { cachedLatest = parseInt(localStorage.getItem('tg_equtr_latest')) || 9089; } catch(e) {}
   list.innerHTML =
     '<div style="padding:0 12px 8px;"><div style="font-size:9px;color:#f5a623;font-family:\'Space Mono\',monospace;margin-bottom:8px;">⚡ LIVE TELEGRAM EMBEDS · @equtr</div></div>' +
     _renderTgEmbeds(cachedLatest, 8);
@@ -13070,14 +13093,14 @@ async function _discoverLatestPostId() {
   // Fetch the channel page directly (works server-side, may fail from browser)
   try {
     // Use Telegram's own widget to probe for latest ID
-    const probe = parseInt(localStorage.getItem('tg_equtr_latest')) || 9089;
+    let probe = 9089; try { probe = parseInt(localStorage.getItem('tg_equtr_latest')) || 9089; } catch(e) {}
     // Try a higher ID to see if it exists
     for (let tryId = probe + 5; tryId > probe; tryId--) {
       try {
         const res = await fetch('https://t.me/equtr/' + tryId + '?embed=1', { signal: AbortSignal.timeout(4000) });
         const text = await res.text();
         if (text.includes('tgme_widget_message_text')) {
-          localStorage.setItem('tg_equtr_latest', String(tryId));
+          try { localStorage.setItem('tg_equtr_latest', String(tryId)); } catch(e) {}
           return;
         }
       } catch(e) {}
@@ -15190,7 +15213,7 @@ function pnlLoad() {
   catch(e) { return []; }
 }
 function pnlSave(trades) {
-  localStorage.setItem(PNL_STORAGE_KEY, JSON.stringify(trades));
+  try { localStorage.setItem(PNL_STORAGE_KEY, JSON.stringify(trades)); } catch(e) {}
 }
 
 function pnlRenderAll() {
