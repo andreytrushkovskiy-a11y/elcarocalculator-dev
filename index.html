@@ -11117,7 +11117,7 @@ function initSigmaButtons() {
           <!-- Timeframe -->
           <div style="display:flex;gap:6px;margin-bottom:10px;" id="alert-tf-row">
             <button class="alert-tf-btn" onclick="alertSelectTF(this,'4H')" style="flex:1;background:#111;border:1px solid #252525;border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">4H</button>
-            <button class="alert-tf-btn active" onclick="alertSelectTF(this,'1D')" style="flex:1;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.4);border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:var(--cyan);cursor:pointer;font-family:'Space Mono',monospace;">1D</button>
+            <button class="alert-tf-btn active" onclick="alertSelectTF(this,'1D')" style="flex:1;background:rgba(255,140,40,.15);border:1px solid rgba(255,140,40,.5);border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:rgb(255,140,40);cursor:pointer;font-family:'Space Mono',monospace;">1D</button>
             <button class="alert-tf-btn" onclick="alertSelectTF(this,'1W')" style="flex:1;background:#111;border:1px solid #252525;border-radius:10px;padding:8px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">1W</button>
           </div>
 
@@ -12323,13 +12323,15 @@ function alertSelectAsset(btn, asset) {
 
 function alertSelectTF(btn, tf) {
   _alertPhase.tf = tf;
+  const tfColors = { '4H':'255,190,80', '1D':'255,140,40', '1W':'200,90,0' };
   document.querySelectorAll('#alert-tf-row .alert-tf-btn').forEach(b => {
     b.classList.remove('active');
     b.style.background = '#111'; b.style.borderColor = '#252525'; b.style.color = '#666';
   });
   btn.classList.add('active');
-  btn.style.background = 'rgba(0,229,255,.12)'; btn.style.borderColor = 'rgba(0,229,255,.4)';
-  btn.style.color = 'var(--cyan)';
+  const c = tfColors[tf] || '255,140,40';
+  btn.style.background = `rgba(${c},.15)`; btn.style.borderColor = `rgba(${c},.5)`;
+  btn.style.color = `rgb(${c})`;
 }
 
 function alertSelectPhase(dir) {
