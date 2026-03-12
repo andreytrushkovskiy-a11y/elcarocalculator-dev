@@ -12417,7 +12417,7 @@ function alertCardHTML(a) {
   const sigNum = level.match(/[pm](\d)/);
   if (sigNum) {
     const probs = {'1':'68%','2':'95%','3':'99.7%'};
-    probInfo = `<div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-top:5px;">⚡ Вероятность разворота: <span style="color:var(--gold);font-weight:800;">${probs[sigNum[1]]||''}</span></div>`;
+    probInfo = `<div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-top:5px;">⚡ Reversal probability: <span style="color:var(--gold);font-weight:800;">${probs[sigNum[1]]||''}</span></div>`;
   }
 
   // The msg IS the human-readable alert text (with emoji)
@@ -12432,7 +12432,7 @@ function alertCardHTML(a) {
     <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
       <span style="font-size:9px;color:#555;font-family:'Space Mono',monospace;">${a.asset||''} · ${a.tf||''}</span>
       <span style="font-size:9px;color:#333;">·</span>
-      <span style="font-size:9px;color:${dirColor};font-family:'Space Mono',monospace;font-weight:700;">${a.dir==='up'?'↑ ВВЕРХ':'↓ ВНИЗ'}</span>
+      <span style="font-size:9px;color:${dirColor};font-family:'Space Mono',monospace;font-weight:700;">${a.dir==='up'?'↑ UP':'↓ DOWN'}</span>
       <span style="flex:1;"></span>
       <span style="font-size:8px;color:#333;font-family:'Space Mono',monospace;">${time}</span>
     </div>
