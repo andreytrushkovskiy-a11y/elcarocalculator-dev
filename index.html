@@ -5721,6 +5721,13 @@ function setAsset(sym) {
   // Save current values
   saveAssetValues(currentAsset);
 
+  // Clear recent calculations when switching asset
+  calcHistory = [];
+  const histCard = document.getElementById('hist-card');
+  if (histCard) histCard.style.display = 'none';
+  const histList = document.getElementById('history-list');
+  if (histList) histList.innerHTML = '';
+
   currentAsset = sym;
 
   // ── Quest tracking ──────────────────────────────
