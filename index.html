@@ -6701,6 +6701,7 @@ function renderViz2() {
   svg += `</svg>`;
 
   const svgEl = document.getElementById('v2-svg');
+  if (!svgEl) return;
   svgEl.innerHTML = svg;
   svgEl.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
   svgEl.style.width  = '100%';
