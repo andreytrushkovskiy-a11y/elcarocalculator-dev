@@ -1766,10 +1766,15 @@ div[class*="tgme"], div[id*="tgme"] { display:none !important; }
 /* ── V2 OVERLAYS (inside oracle context) ── */
 .overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.88);
-  z-index:1500; align-items:flex-end; justify-content:center;
+  z-index:1500; align-items:center; justify-content:center;
   backdrop-filter:blur(6px);
 }
 .overlay.open { display:flex; }
+.overlay-sheet {
+  background:#111; border-radius:20px; width:calc(100% - 32px);
+  max-width:400px; padding:20px; border:1px solid #222;
+  animation:su .3s cubic-bezier(.34,1.56,.64,1);
+}
 .modal-sheet {
   background:#0f0f0f; border-radius:26px 26px 0 0; width:100%;
   max-width:430px; padding:0 0 36px; border-top:1px solid #222;
@@ -2340,7 +2345,7 @@ div[class*="tgme"], div[id*="tgme"] { display:none !important; }
 
 /* live card */
 #oracle-panel .live-card {
-  margin:0 12px 12px;
+  margin:10px 12px 12px;
   background:linear-gradient(135deg,#1a0000,#0f0f00);
   border:1px solid #ff4757; border-radius:16px; padding:16px; cursor:pointer;
 }
@@ -11175,12 +11180,30 @@ function initSigmaButtons() {
           <button class="verdict-tf-btn" onclick="selectVerdictTF(this,'btc','1W')">1W</button>
           <button class="verdict-tf-btn" onclick="selectVerdictTF(this,'btc','1M')">1M</button>
         </div>
-        <div class="verdict-pools">
-          <div class="verdict-pool-yes"><div class="verdict-pool-val" style="color:var(--green)">31,200⬡</div><div class="verdict-pool-lbl">YES POOL</div></div>
-          <div class="verdict-pool-total"><div class="verdict-pool-val" style="color:#888">78,400⬡</div><div class="verdict-pool-lbl">TOTAL</div></div>
-          <div class="verdict-pool-no"><div class="verdict-pool-val" style="color:var(--red)">47,200⬡</div><div class="verdict-pool-lbl">NO POOL</div></div>
+        <div style="display:flex;align-items:stretch;gap:10px;margin-bottom:10px;height:120px;">
+          <!-- YES side -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+            <div style="font-size:12px;font-weight:800;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:4px;">31,200⬡</div>
+            <div style="width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(0,230,118,.4),rgba(0,230,118,.15));border:1px solid rgba(0,230,118,.3);border-bottom:none;height:40%;min-height:20px;position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;">✓</div>
+            </div>
+            <div style="font-size:8px;color:var(--green);font-family:'Space Mono',monospace;font-weight:700;margin-top:4px;letter-spacing:1px;">YES POOL</div>
+          </div>
+          <!-- Center total -->
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:60px;">
+            <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;letter-spacing:1px;">TOTAL</div>
+            <div style="font-size:16px;font-weight:900;color:#ccc;font-family:'Space Mono',monospace;margin:4px 0;">78,400⬡</div>
+            <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;">40% / 60%</div>
+          </div>
+          <!-- NO side -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+            <div style="font-size:12px;font-weight:800;color:var(--red);font-family:'Space Mono',monospace;margin-bottom:4px;">47,200⬡</div>
+            <div style="width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(255,59,92,.4),rgba(255,59,92,.15));border:1px solid rgba(255,59,92,.3);border-bottom:none;height:60%;min-height:20px;position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;">✗</div>
+            </div>
+            <div style="font-size:8px;color:var(--red);font-family:'Space Mono',monospace;font-weight:700;margin-top:4px;letter-spacing:1px;">NO POOL</div>
+          </div>
         </div>
-        <div class="verdict-bar-wrap"><div class="verdict-bar-yes" style="width:40%"></div></div>
         <div class="verdict-my-bet" id="btc-my-bet">✓ YOUR BET: <span id="btc-bet-label">—</span></div>
         <div class="verdict-btns">
           <button class="verdict-btn-yes" onclick="openVerdictBet('BTC','BITCOIN','₿','4H','Bull','btc','yes')">✓ YES — WILL WORK</button>
@@ -11210,12 +11233,27 @@ function initSigmaButtons() {
           <button class="verdict-tf-btn" onclick="selectVerdictTF(this,'gold','1W')">1W</button>
           <button class="verdict-tf-btn active" onclick="selectVerdictTF(this,'gold','1M')">1M</button>
         </div>
-        <div class="verdict-pools">
-          <div class="verdict-pool-yes"><div class="verdict-pool-val" style="color:var(--green)">142,000⬡</div><div class="verdict-pool-lbl">YES POOL</div></div>
-          <div class="verdict-pool-total"><div class="verdict-pool-val" style="color:#888">210,000⬡</div><div class="verdict-pool-lbl">TOTAL</div></div>
-          <div class="verdict-pool-no"><div class="verdict-pool-val" style="color:var(--red)">68,000⬡</div><div class="verdict-pool-lbl">NO POOL</div></div>
+        <div style="display:flex;align-items:stretch;gap:10px;margin-bottom:10px;height:120px;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+            <div style="font-size:12px;font-weight:800;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:4px;">142,000⬡</div>
+            <div style="width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(0,230,118,.4),rgba(0,230,118,.15));border:1px solid rgba(0,230,118,.3);border-bottom:none;height:68%;min-height:20px;position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;">✓</div>
+            </div>
+            <div style="font-size:8px;color:var(--green);font-family:'Space Mono',monospace;font-weight:700;margin-top:4px;letter-spacing:1px;">YES POOL</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:60px;">
+            <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;letter-spacing:1px;">TOTAL</div>
+            <div style="font-size:16px;font-weight:900;color:#ccc;font-family:'Space Mono',monospace;margin:4px 0;">210,000⬡</div>
+            <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;">68% / 32%</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+            <div style="font-size:12px;font-weight:800;color:var(--red);font-family:'Space Mono',monospace;margin-bottom:4px;">68,000⬡</div>
+            <div style="width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(255,59,92,.4),rgba(255,59,92,.15));border:1px solid rgba(255,59,92,.3);border-bottom:none;height:32%;min-height:20px;position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;">✗</div>
+            </div>
+            <div style="font-size:8px;color:var(--red);font-family:'Space Mono',monospace;font-weight:700;margin-top:4px;letter-spacing:1px;">NO POOL</div>
+          </div>
         </div>
-        <div class="verdict-bar-wrap"><div class="verdict-bar-yes" style="width:68%"></div></div>
         <div class="verdict-my-bet" id="gold-my-bet">✓ YOUR BET: <span id="gold-bet-label">—</span></div>
         <div class="verdict-btns">
           <button class="verdict-btn-yes" onclick="openVerdictBet('GOLD','GOLD/XAU','⬡','1M','Bull','gold','yes')">✓ YES — WILL HIT</button>
@@ -11244,12 +11282,27 @@ function initSigmaButtons() {
           <button class="verdict-tf-btn active" onclick="selectVerdictTF(this,'spx','1W')">1W</button>
           <button class="verdict-tf-btn" onclick="selectVerdictTF(this,'spx','1M')">1M</button>
         </div>
-        <div class="verdict-pools">
-          <div class="verdict-pool-yes"><div class="verdict-pool-val" style="color:var(--green)">89,000⬡</div><div class="verdict-pool-lbl">YES POOL</div></div>
-          <div class="verdict-pool-total"><div class="verdict-pool-val" style="color:#888">195,000⬡</div><div class="verdict-pool-lbl">TOTAL</div></div>
-          <div class="verdict-pool-no"><div class="verdict-pool-val" style="color:var(--red)">106,000⬡</div><div class="verdict-pool-lbl">NO POOL</div></div>
+        <div style="display:flex;align-items:stretch;gap:10px;margin-bottom:10px;height:120px;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+            <div style="font-size:12px;font-weight:800;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:4px;">89,000⬡</div>
+            <div style="width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(0,230,118,.4),rgba(0,230,118,.15));border:1px solid rgba(0,230,118,.3);border-bottom:none;height:46%;min-height:20px;position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;">✓</div>
+            </div>
+            <div style="font-size:8px;color:var(--green);font-family:'Space Mono',monospace;font-weight:700;margin-top:4px;letter-spacing:1px;">YES POOL</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:60px;">
+            <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;letter-spacing:1px;">TOTAL</div>
+            <div style="font-size:16px;font-weight:900;color:#ccc;font-family:'Space Mono',monospace;margin:4px 0;">195,000⬡</div>
+            <div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;">46% / 54%</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
+            <div style="font-size:12px;font-weight:800;color:var(--red);font-family:'Space Mono',monospace;margin-bottom:4px;">106,000⬡</div>
+            <div style="width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,rgba(255,59,92,.4),rgba(255,59,92,.15));border:1px solid rgba(255,59,92,.3);border-bottom:none;height:54%;min-height:20px;position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;">✗</div>
+            </div>
+            <div style="font-size:8px;color:var(--red);font-family:'Space Mono',monospace;font-weight:700;margin-top:4px;letter-spacing:1px;">NO POOL</div>
+          </div>
         </div>
-        <div class="verdict-bar-wrap"><div class="verdict-bar-yes" style="width:46%"></div></div>
         <div class="verdict-my-bet" id="spx-my-bet">✓ YOUR BET: <span id="spx-bet-label">—</span></div>
         <div class="verdict-btns">
           <button class="verdict-btn-yes" onclick="openVerdictBet('SPX','S&P 500','📊','1W','Bear','spx','yes')">✓ YES — WILL DROP</button>
