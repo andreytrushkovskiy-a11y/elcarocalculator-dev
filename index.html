@@ -7136,12 +7136,62 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ═══════════════════ DISCLAIMER ═══════════════════
+function isCalcDisclaimerAccepted() {
+  return localStorage.getItem('elcaro_calc_disclaimer') === '1';
+}
+function showCalcDisclaimer(viewOnly) {
+  const ov = document.getElementById('calc-disclaimer-overlay');
+  ov.style.display = 'flex';
+  const body = document.getElementById('calc-disclaimer-body');
+  const cb = document.getElementById('calc-disclaimer-cb');
+  const btn = document.getElementById('calc-disclaimer-btn');
+  const hint = document.getElementById('calc-disclaimer-scroll-hint');
+  const cbLabel = document.getElementById('calc-disclaimer-cb-label');
+  body.scrollTop = 0;
+  cb.checked = false;
+  cb.disabled = true;
+  btn.disabled = true;
+  btn.style.opacity = '.4';
+
+  if (viewOnly) {
+    cbLabel.style.display = 'none';
+    hint.style.display = 'none';
+    btn.textContent = 'CLOSE';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.onclick = function() { ov.style.display = 'none'; };
+  } else {
+    cbLabel.style.display = 'flex';
+    hint.style.display = 'block';
+    btn.textContent = 'ACCEPT & CONTINUE';
+    btn.onclick = function() { acceptCalcDisclaimer(); };
+    function checkScroll() {
+      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 30) {
+        cb.disabled = false;
+        hint.style.display = 'none';
+      }
+    }
+    body.addEventListener('scroll', checkScroll);
+    setTimeout(checkScroll, 100);
+    cb.onchange = function() { btn.disabled = !cb.checked; btn.style.opacity = cb.checked ? '1' : '.4'; };
+  }
+}
+function acceptCalcDisclaimer() {
+  localStorage.setItem('elcaro_calc_disclaimer', '1');
+  document.getElementById('calc-disclaimer-overlay').style.display = 'none';
+}
+
 // ═══════════════════ INIT ═══════════════════
 window.onload = () => {
   ocLoad(); // restore OC state from localStorage
   loadExpiryDates('BTC');
   liveCalc();
   setMode('alerts'); // default screen on launch — HSHS alerts
+  // Show mandatory disclaimer for non-whitelist users on first visit
+  if (!isCalcDisclaimerAccepted()) {
+    setTimeout(() => showCalcDisclaimer(false), 500);
+  }
 };
 </script>
 
@@ -11897,6 +11947,11 @@ function initSigmaButtons() {
     <div class="quest-item" id="earn-share-btn" onclick="profEarnShare(this)"><div class="qi-icon">📢</div><div class="qi-info"><div class="qi-name">Share to Social</div><div class="qi-desc">TELEGRAM / X / INSTAGRAM</div></div><div class="qi-reward"><div class="qi-coins">+50⬡</div><div class="qi-extra" style="color:var(--bronze)">+BRONZE</div></div></div>
     <div class="quest-item" onclick="profEarnRefer()"><div class="qi-icon">👥</div><div class="qi-info"><div class="qi-name">Refer a Friend</div><div class="qi-desc" id="earn-refer-desc">COPY YOUR REFERRAL LINK</div></div><div class="qi-reward"><div class="qi-coins">+500⬡</div><div class="qi-extra" style="color:var(--silver)">+SILVER</div></div></div>
     <div class="quest-item" style="margin-bottom:8px" onclick="profEarnReview()"><div class="qi-icon">⭐</div><div class="qi-info"><div class="qi-name">Write a Review</div><div class="qi-desc">APP STORE / GOOGLE PLAY</div></div><div class="qi-reward"><div class="qi-coins">+200⬡</div></div></div>
+
+    <!-- DISCLAIMER BUTTON -->
+    <div style="margin-top:20px;padding:0 4px;">
+      <button onclick="showCalcDisclaimer(true)" style="width:100%;padding:14px;background:#ff3d3d;color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.5px;">DISCLAIMER</button>
+    </div>
   </div>
 
         </div>
@@ -11904,6 +11959,57 @@ function initSigmaButtons() {
 
     </div><!-- /op-body -->
   </div>
+
+<!-- ═══════════════ DISCLAIMER MODAL ═══════════════ -->
+<div id="calc-disclaimer-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:16px;max-width:420px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid #1e1e1e;text-align:center;flex-shrink:0;">
+      <h2 style="font-size:16px;color:#ff3d3d;font-family:'Syne',sans-serif;font-weight:700;">LEGAL DISCLAIMER & TERMS OF USE</h2>
+    </div>
+    <div id="calc-disclaimer-body" style="padding:14px 18px;overflow-y:auto;flex:1;font-size:10px;line-height:1.7;color:#888;">
+      <p style="color:#ff3d3d;font-weight:700;font-size:11px;margin-bottom:12px;">MANDATORY NOTICE: THIS DISCLAIMER CONSTITUTES A LEGALLY BINDING AGREEMENT BETWEEN YOU AND ELCARO INC., A DELAWARE CORPORATION. BY ACCESSING OR USING ANY ELCARO SERVICES, YOU REPRESENT THAT YOU ARE AT LEAST 18 YEARS OF AGE AND AGREE TO BE LEGALLY BOUND BY THIS DISCLAIMER IN ITS ENTIRETY.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 1. EDUCATIONAL USE ONLY</h3>
+      <p>1.1 All content provided through the Services is strictly for educational and informational purposes only.</p>
+      <p>1.2 Nothing constitutes financial advice, investment advice, trading advice, or any regulated professional service.</p>
+      <p>1.3 Any dates, timeframes, price levels referenced represent educational model outputs only and must not be interpreted as trading signals.</p>
+      <p>1.4 ELCARO provides financial education and algorithmic research presentation.</p>
+      <p>1.5 This Disclaimer applies to all communications (Telegram, Instagram, YouTube, X, websites, etc.)</p>
+      <p>1.6 Social media communications may be informal and must not be interpreted as trading signals.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 2. REGULATORY STATUS</h3>
+      <p>ELCARO Inc. is not registered as an Investment Adviser, Broker-Dealer, CTA, or any regulated entity. No fiduciary relationship is created.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 3. USER REPRESENTATIONS</h3>
+      <p>You represent that you are at least 18 years old, access voluntarily, and are capable of evaluating financial risk. You do not rely on ELCARO for financial decisions.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 4. RISK DISCLOSURE</h3>
+      <p>Trading involves substantial risk including total loss of capital. No algorithm can predict markets with certainty. No expectation of profit.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 5. NO TRADING SIGNALS</h3>
+      <p>ELCARO does not provide trading signals. References are educational model outputs only.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 6. NO CUSTODY OF FUNDS</h3>
+      <p>ELCARO will never accept user funds or manage assets. Any such request is fraudulent.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 7. LIMITATION OF LIABILITY</h3>
+      <p>Maximum liability: greater of amount paid in previous 12 months or $100 USD.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 8. ASSUMPTION OF RISK</h3>
+      <p>You acknowledge Content is educational only and assume full responsibility for all trading decisions.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 9. INDEMNIFICATION</h3>
+      <p>You agree to indemnify ELCARO from any claims arising from your use of the Services.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 10. DISPUTE RESOLUTION</h3>
+      <p>Binding arbitration through AAA in Los Angeles County, California. Class action waiver.</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTION 11. NO WARRANTIES</h3>
+      <p>Services provided "AS IS" and "AS AVAILABLE."</p>
+      <h3 style="font-size:11px;color:#e8e8e8;margin:12px 0 5px;font-family:'Syne',sans-serif;">SECTIONS 12-14</h3>
+      <p>Users responsible for local law compliance. ELCARO may update terms. If any provision is unenforceable, remaining provisions remain valid.</p>
+      <p style="text-align:center;margin-top:14px;color:#555;font-size:9px;">&copy; 2026 ELCARO Inc. &mdash; Delaware Corporation &mdash; Los Angeles, California</p>
+      <p style="text-align:center;color:#ff3d3d;font-weight:700;font-size:10px;margin-top:10px;">Past performance is not indicative of future results. Trading involves risk of substantial loss.</p>
+    </div>
+    <div id="calc-disclaimer-scroll-hint" style="text-align:center;font-size:9px;color:#555;padding:4px 0;animation:pulse 2s infinite;">Scroll down to read full disclaimer</div>
+    <div style="padding:12px 18px;border-top:1px solid #1e1e1e;flex-shrink:0;">
+      <label id="calc-disclaimer-cb-label" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;font-size:11px;color:#888;">
+        <input type="checkbox" id="calc-disclaimer-cb" disabled style="width:18px;height:18px;margin-top:2px;accent-color:#ff6a00;flex-shrink:0;">
+        <span>I have read, understood, and agree to the ELCARO Legal Disclaimer & Terms of Use.</span>
+      </label>
+      <button id="calc-disclaimer-btn" disabled onclick="acceptCalcDisclaimer()" style="width:100%;padding:12px;background:linear-gradient(135deg,#ff6a00,#ff8c33);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;opacity:.4;">ACCEPT & CONTINUE</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════ MODALS ═══════════════ -->
 
