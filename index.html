@@ -6845,7 +6845,7 @@ function addHistory(entry) {
           <span class="hist-date">${h.dateLabel}</span>
           <span style="font-size:8px;color:#555;font-family:'Space Mono',monospace;">${dTag}</span>
         </div>
-        <span class="hist-straddle">σ ${(h.sigma*100).toFixed(1)}% · <span>$${fmtPrice(h.straddle)}</span></span>
+        <span class="hist-straddle">σ ${h.spot ? (h.straddle/h.spot*100).toFixed(1) : '0'}% · <span>$${fmtPrice(h.straddle)}</span></span>
       </div>
       <div class="hist-rows">${beRow}${sigmaRows}</div>
     </div>`;
