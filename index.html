@@ -12765,6 +12765,7 @@ function alertPageCardHTML(a) {
   let accent = '#555';
   if (/highband|lowband|center/.test(level)) accent = 'var(--red)';
   else if (/vol_[pm]/.test(level)) accent = '#ff6a00';
+  else if (/hidden_/.test(level) && a.type === 'divergence') accent = '#b464ff';
   else if (/bullish|bearish/.test(level) && a.type === 'divergence') accent = isConfirmed ? 'var(--green)' : '#888';
   else if (/cross/.test(level)) accent = 'var(--cyan)';
 
@@ -12780,10 +12781,15 @@ function alertPageCardHTML(a) {
     probBadge = `<span style="background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:5px;padding:2px 6px;font-size:8px;color:#ffd700;margin-left:6px;">⚡ ${p}</span>`;
   }
 
+  // Hidden divergence badge
+  const isHidden = /hidden_/i.test(level);
+  let hiddenBadge = '';
+  if (isHidden) hiddenBadge = '<span style="background:rgba(180,100,255,.12);border:1px solid rgba(180,100,255,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:#b464ff;font-weight:800;margin-left:4px;">▲▼ HIDDEN DIV</span>';
+
   // Confirmation badge for divergences
   let confBadge = '';
   if (isUnconfirmed) confBadge = '<span style="background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.25);border-radius:4px;padding:1px 5px;font-size:7px;color:#cca300;font-weight:800;margin-left:4px;">⏳ UNCONFIRMED</span>';
-  else if (isConfirmed) confBadge = '<span style="background:rgba(0,200,100,.12);border:1px solid rgba(0,200,100,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--green);font-weight:800;margin-left:4px;">✅ CONFIRMED</span>';
+  else if (isConfirmed) confBadge = '<span style="background:rgba(0,200,100,.12);border:1px solid rgba(0,200,100,.3);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--green);font-weight:800;margin-left:4px;">☑️ CONFIRMED</span>';
   else if (isSuperseded) confBadge = '<span style="font-size:7px;color:#333;margin-left:4px;">superseded</span>';
 
   const leftBar = `<div style="position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:${accent};"></div>`;
@@ -12792,7 +12798,7 @@ function alertPageCardHTML(a) {
     ${leftBar}
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;">
-        <div style="font-size:14px;font-weight:800;color:#eee;line-height:1.4;">${displayMsg}${probBadge}${confBadge}</div>
+        <div style="font-size:14px;font-weight:800;color:#eee;line-height:1.4;">${displayMsg}${probBadge}${hiddenBadge}${confBadge}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
           <span style="font-size:9px;color:#444;font-family:'Space Mono',monospace;">${a.asset||'BTC'} · ${a.tf||'4H'}</span>
           <span style="font-size:9px;color:${dirColor};font-family:'Space Mono',monospace;font-weight:700;">${a.dir==='up'?'↑ UP':'↓ DOWN'}</span>
