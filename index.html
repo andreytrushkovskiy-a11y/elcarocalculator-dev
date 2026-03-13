@@ -12537,6 +12537,20 @@ function alertPageSave() {
   localStorage.setItem('elcaro_alert_phase', JSON.stringify(_alertPhase));
 }
 
+function togglePhasePanel() {
+  const body = document.getElementById('ap-phase-body');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+}
+
+function alertPhaseSaveAndClose() {
+  alertPageSave();
+  alertsPageRender();
+  const body = document.getElementById('ap-phase-body');
+  if (body) body.style.display = 'none';
+}
+
 function alertPageCardHTML(a) {
   const level = a.level || 'unknown';
   const dirColor = a.dir === 'up' ? 'var(--green)' : 'var(--red)';
@@ -16735,26 +16749,30 @@ function pnlDeleteTrade(id) {
     </div>
   </div>
 
-  <!-- Phase config (compact) -->
+  <!-- Phase config (collapsible) -->
   <div style="margin:0 8px 12px;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:16px;padding:14px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+    <div onclick="togglePhasePanel()" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
       <div style="font-size:9px;color:#444;font-family:'Space Mono',monospace;letter-spacing:1px;">PHASE</div>
       <div style="flex:1;height:1px;background:#1e1e1e;"></div>
+      <div id="ap-phase-toggle" style="font-size:13px;color:#555;transition:transform .2s;">✏️</div>
     </div>
-    <div style="display:flex;gap:6px;margin-bottom:10px;" id="alerts-page-phase-row">
-      <button id="ap-phase-up" onclick="alertPagePhase('up')" style="flex:1;background:#111;border:1px solid #252525;border-radius:10px;padding:9px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">↑ ASCENDING</button>
-      <button id="ap-phase-down" onclick="alertPagePhase('down')" style="flex:1;background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);border-radius:10px;padding:9px;font-size:11px;font-weight:800;color:var(--red);cursor:pointer;font-family:'Space Mono',monospace;">↓ DESCENDING</button>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <div style="flex:1;">
-        <div style="font-size:8px;color:#333;font-family:'Space Mono',monospace;margin-bottom:3px;">FROM</div>
-        <input type="date" id="ap-date-from" onchange="alertPageSave()" style="width:100%;background:#181818;border:1px solid #252525;border-radius:8px;padding:7px;font-size:11px;color:#ccc;font-family:'Space Mono',monospace;box-sizing:border-box;" />
+    <div id="ap-phase-body" style="display:none;margin-top:10px;">
+      <div style="display:flex;gap:6px;margin-bottom:10px;" id="alerts-page-phase-row">
+        <button id="ap-phase-up" onclick="alertPagePhase('up')" style="flex:1;background:#111;border:1px solid #252525;border-radius:10px;padding:9px;font-size:11px;font-weight:800;color:#666;cursor:pointer;font-family:'Space Mono',monospace;">↑ ASCENDING</button>
+        <button id="ap-phase-down" onclick="alertPagePhase('down')" style="flex:1;background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);border-radius:10px;padding:9px;font-size:11px;font-weight:800;color:var(--red);cursor:pointer;font-family:'Space Mono',monospace;">↓ DESCENDING</button>
       </div>
-      <div style="color:#333;font-size:14px;margin-top:12px;">→</div>
-      <div style="flex:1;">
-        <div style="font-size:8px;color:#333;font-family:'Space Mono',monospace;margin-bottom:3px;">TO</div>
-        <input type="date" id="ap-date-to" onchange="alertPageSave()" style="width:100%;background:#181818;border:1px solid #252525;border-radius:8px;padding:7px;font-size:11px;color:#ccc;font-family:'Space Mono',monospace;box-sizing:border-box;" />
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <div style="flex:1;">
+          <div style="font-size:8px;color:#333;font-family:'Space Mono',monospace;margin-bottom:3px;">FROM</div>
+          <input type="date" id="ap-date-from" style="width:100%;background:#181818;border:1px solid #252525;border-radius:8px;padding:7px;font-size:11px;color:#ccc;font-family:'Space Mono',monospace;box-sizing:border-box;" />
+        </div>
+        <div style="color:#333;font-size:14px;margin-top:12px;">→</div>
+        <div style="flex:1;">
+          <div style="font-size:8px;color:#333;font-family:'Space Mono',monospace;margin-bottom:3px;">TO</div>
+          <input type="date" id="ap-date-to" style="width:100%;background:#181818;border:1px solid #252525;border-radius:8px;padding:7px;font-size:11px;color:#ccc;font-family:'Space Mono',monospace;box-sizing:border-box;" />
+        </div>
       </div>
+      <button onclick="alertPhaseSaveAndClose()" style="width:100%;background:linear-gradient(135deg,#ff6a00,#ff8c00);border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;color:#000;cursor:pointer;font-family:'Space Mono',monospace;letter-spacing:1px;">💾 SAVE</button>
     </div>
   </div>
 
