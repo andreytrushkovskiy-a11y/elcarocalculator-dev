@@ -1231,10 +1231,11 @@ body {
   border-left:3px solid var(--green);
   border-radius:8px; padding:9px 13px;
   font-size:12px; font-weight:700;
-  transform:translateX(140%); transition:transform .3s;
+  transform:translateX(calc(100% + 40px)); transition:transform .3s;
   box-shadow:0 8px 28px rgba(0,0,0,.6);
+  pointer-events:none; opacity:0;
 }
-.toast.show { transform:translateX(0); }
+.toast.show { transform:translateX(0); opacity:1; pointer-events:auto; }
 
 /* ── EXPIRY STATUS ── */
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
