@@ -14605,19 +14605,19 @@ const GUILD_LEADERBOARD = [
 ];
 
 function opRenderGuild() {
-  // Inject rich guild-section content into op-guild's scrollable container
+  // Move the actual guild-section element into op-guild's scrollable container
   const src = document.getElementById('guild-section');
   const dst = document.getElementById('op-guild');
   if (src && dst) {
     const scrollable = dst.querySelector('.scrollable-op');
     if (scrollable && !scrollable.dataset.guildPopulated) {
-      scrollable.innerHTML = src.innerHTML;
+      // Move (not copy) guild-section into the scrollable container
+      scrollable.innerHTML = '';
+      scrollable.appendChild(src);
+      src.style.display = 'block';
       scrollable.dataset.guildPopulated = '1';
     }
   }
-  // Scroll chat to bottom
-  const msgs = document.getElementById('guild-gchat-msgs');
-  if (msgs) msgs.scrollTop = msgs.scrollHeight;
 }
 
 function calcGuildScore() {
