@@ -4431,7 +4431,7 @@ input[type=range]::-webkit-slider-thumb {
         <!-- VIZ 5: Payoff Diagram -->
         <div id="viz-5" style="display:none;">
           <div style="font-size:9px;color:rgba(255,255,255,.3);margin-bottom:12px;font-weight:500;">
-            Straddle buyer payoff · Green = profit zone · Red = loss zone · Dashed = sigma levels
+            Short straddle payoff · Green = where price stays · Red = loss zone · Dashed = sigma levels
           </div>
           <div id="v5-payoff"></div>
         </div>
@@ -6418,8 +6418,8 @@ function renderPayoffDiagram() {
   const xRange = xMax - xMin;
   const toX = v => PAD.left + ((v - xMin) / xRange) * chartW;
 
-  // PnL = |price - spot| - straddle (long straddle buyer)
-  const pnl = p => Math.abs(p - spot) - straddle;
+  // PnL = straddle - |price - spot| (short straddle / sold straddle)
+  const pnl = p => straddle - Math.abs(p - spot);
   const maxPnl = pnl(xMax);
   const minPnl = -straddle;
   const yPad = Math.abs(maxPnl - minPnl) * 0.1;
@@ -6805,9 +6805,9 @@ function addHistory(entry) {
       <div class="hist-row">
         <span class="hist-row-lbl" style="color:${sigmaColors[l.k]}">${l.k}σ</span>
         <span class="hist-row-range">
-          <span style="color:#eee">${fmtPrice(l.lo)}</span>
+          <span style="color:var(--green)">${fmtPrice(l.lo)}</span>
           <span style="color:var(--text2)"> — </span>
-          <span style="color:#eee">${fmtPrice(l.hi)}</span>
+          <span style="color:var(--red)">${fmtPrice(l.hi)}</span>
         </span>
         <span class="hist-row-prob">${l.prob}</span>
       </div>`).join('');
@@ -12003,7 +12003,7 @@ function initSigmaButtons() {
     <div id="calc-disclaimer-scroll-hint" style="text-align:center;font-size:9px;color:#555;padding:4px 0;animation:pulse 2s infinite;">Scroll down to read full disclaimer</div>
     <div style="padding:12px 18px;border-top:1px solid #1e1e1e;flex-shrink:0;">
       <label id="calc-disclaimer-cb-label" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;font-size:11px;color:#888;">
-        <input type="checkbox" id="calc-disclaimer-cb" disabled style="width:18px;height:18px;margin-top:2px;accent-color:#ff6a00;flex-shrink:0;">
+        <input type="checkbox" id="calc-disclaimer-cb" disabled style="width:18px;height:18px;margin-top:2px;accent-color:#ff6a00;flex-shrink:0;outline:2px solid #555;outline-offset:-2px;border-radius:3px;">
         <span>I have read, understood, and agree to the ELCARO Legal Disclaimer & Terms of Use.</span>
       </label>
       <button id="calc-disclaimer-btn" disabled onclick="acceptCalcDisclaimer()" style="width:100%;padding:12px;background:linear-gradient(135deg,#ff6a00,#ff8c33);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;opacity:.4;">ACCEPT & CONTINUE</button>
