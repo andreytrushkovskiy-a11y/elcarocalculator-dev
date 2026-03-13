@@ -4386,13 +4386,12 @@ input[type=range]::-webkit-slider-thumb {
             SIGMA LEVELS <span style="color:var(--orange)">—</span> WHERE PRICE WON'T BE
           </div>
           <div class="viz-tabs" style="margin-bottom:0;">
-            <button class="viz-tab active" onclick="setViz(1)" id="viz-tab-1">BAR</button>
-            <button class="viz-tab" onclick="setViz(2)" id="viz-tab-2">GAUGE</button>
+            <button class="viz-tab active" onclick="setViz(5)" id="viz-tab-5">PAYOFF</button>
+            <button class="viz-tab" onclick="setViz(1)" id="viz-tab-1">BAR</button>
             <button class="viz-tab" onclick="setViz(3)" id="viz-tab-3">LADDER</button>
             <button class="viz-tab" id="viz-tab-4" onclick="setViz(4)"
               title="Available after calculating 5 different expiry dates"
               style="opacity:0.35;cursor:not-allowed;">TIMELINE</button>
-            <button class="viz-tab" onclick="setViz(5)" id="viz-tab-5">PAYOFF</button>
           </div>
         </div>
 
@@ -4400,7 +4399,7 @@ input[type=range]::-webkit-slider-thumb {
         <div id="sigma-grid" style="display:grid;gap:8px;margin-bottom:14px;"></div>
 
         <!-- VIZ 1: Range bar -->
-        <div id="viz-1">
+        <div id="viz-1" style="display:none;"
           <div class="v1-wrap" id="v1-bar-wrap">
             <div class="v1-track" id="v1-track"></div>
           </div>
@@ -4408,13 +4407,7 @@ input[type=range]::-webkit-slider-thumb {
         </div>
 
         <!-- VIZ 2: Gauge arcs -->
-        <div id="viz-2" style="display:none;">
-          <div class="v2-wrap">
-            <svg class="v2-gauge" id="v2-svg"></svg>
-            <div class="v2-labels" id="v2-labels"></div>
-            <div class="v2-sigma-row" id="v2-sigma-row"></div>
-          </div>
-        </div>
+        <div id="viz-2" style="display:none;"></div>
 
         <!-- VIZ 3: Price Ladder -->
         <div id="viz-3" style="display:none;">
@@ -4430,7 +4423,7 @@ input[type=range]::-webkit-slider-thumb {
         </div>
 
         <!-- VIZ 5: Payoff Diagram -->
-        <div id="viz-5" style="display:none;">
+        <div id="viz-5">
           <div style="font-size:9px;color:rgba(255,255,255,.3);margin-bottom:12px;font-weight:500;">
             Short straddle payoff · Green = where price stays · Red = loss zone · Dashed = sigma levels
           </div>
@@ -5669,7 +5662,7 @@ const DERIBIT_LINEAR  = ['SOL'];
 
 let currentAsset = 'BTC';
 let lastResult   = null;
-let currentViz   = 1;
+let currentViz   = 5;
 
 // Per-asset stored values
 const assetData = {
@@ -6258,8 +6251,10 @@ function generateFutureExpiries(n) {
 function setViz(n) {
   currentViz = n;
   [1,2,3,4,5].forEach(i => {
-    document.getElementById('viz-' + i).style.display = i === n ? 'block' : 'none';
-    document.getElementById('viz-tab-' + i).classList.toggle('active', i === n);
+    const el = document.getElementById('viz-' + i);
+    const tab = document.getElementById('viz-tab-' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+    if (tab) tab.classList.toggle('active', i === n);
   });
   // Show GENERATE POST button only on TIMELINE tab with 2+ calcs
   const btnWrap = document.getElementById('tl-post-btn-wrap');
