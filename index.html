@@ -4167,11 +4167,6 @@ input[type=range]::-webkit-slider-thumb {
       👁 ELCARO
     </button>
 
-    <button class="mode-btn" id="mode-guild-nav" onclick="setMode('guild')"
-      title="Guild" style="flex:1;min-width:0;color:#00e676;">
-      🛡️ GUILD
-    </button>
-
     <!-- Divider -->
     <div style="width:1px;background:#1e1e1e;margin:6px 2px;flex-shrink:0;"></div>
 
@@ -7403,7 +7398,6 @@ function setMode(mode) {
     'heatmap-crypto':'heatmap-crypto-section',
     calendar:        'calendar-section',
     news:            'news-section',
-    guild:           'guild-section',
     elcaro:          'elcaro-section',
     pnl:             'pnl-section',
     exchange:        'exchange-section',
@@ -10995,6 +10989,9 @@ function initSigmaButtons() {
       <div class="op-tab" onclick="oracleTab('profile',this)">
         <span class="op-tab-icon">👤</span>PROFILE
       </div>
+      <div class="op-tab" onclick="oracleTab('guild',this)">
+        <span class="op-tab-icon">🛡️</span>GUILD
+      </div>
     </div>
 
     <!-- Body -->
@@ -11288,107 +11285,8 @@ function initSigmaButtons() {
         </div>
       </div>
 
-      <!-- ══ GUILD ══ -->
+      <!-- ══ GUILD (populated dynamically from guild-section) ══ -->
       <div class="op-screen" id="op-guild" style="display:none;">
-        <div class="scrollable-op">
-
-    <!-- GUILD CARD -->
-    <div class="slabel">MY GUILD</div>
-    <div class="guild-card" style="cursor:default">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <span class="guild-emblem" id="g-emblem">🔮</span>
-        <div style="flex:1">
-          <div class="guild-name" id="g-name">ORACLE COVENANT</div>
-          <div class="guild-motto" id="g-motto">"Those who see the future, shape it."</div>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <div onclick="guildInvite()" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);border-radius:8px;padding:5px 10px;font-size:9px;font-weight:700;color:var(--emerald);cursor:pointer;font-family:'Space Mono',monospace;">🔗 INVITE</div>
-          <div onclick="guildShowRules()" style="background:rgba(255,255,255,.04);border:1px solid #222;border-radius:8px;padding:5px 10px;font-size:9px;font-weight:700;color:#888;cursor:pointer;font-family:'Space Mono',monospace;">📋 RULES</div>
-        </div>
-      </div>
-      <div class="guild-stats">
-        <div class="gs-item"><div class="gs-val" id="g-members">8</div><div class="gs-lbl">MEMBERS</div></div>
-        <div class="gs-item"><div class="gs-val" id="g-coins">12,400</div><div class="gs-lbl">GUILD OC</div></div>
-        <div class="gs-item"><div class="gs-val" id="g-rank">#14</div><div class="gs-lbl">RANK</div></div>
-        <div class="gs-item"><div class="gs-val" id="g-avgscore">83%</div><div class="gs-lbl">AVG SCORE</div></div>
-      </div>
-      <!-- Weekly progress bar -->
-      <div style="margin-top:10px;">
-        <div style="display:flex;justify-content:space-between;font-size:9px;color:#555;font-family:'Space Mono',monospace;margin-bottom:4px;">
-          <span>WEEKLY PROGRESS</span><span id="g-week-pct">72%</span>
-        </div>
-        <div style="background:#1a1a1a;border-radius:4px;height:4px;overflow:hidden;">
-          <div id="g-week-bar" style="height:4px;background:linear-gradient(90deg,var(--emerald2),var(--emerald));width:72%;border-radius:4px;transition:width .6s;"></div>
-        </div>
-        <div style="font-size:8px;color:#444;font-family:'Space Mono',monospace;margin-top:3px;" id="g-week-label">Season 1 · Week 4 of 13</div>
-      </div>
-    </div>
-
-    <!-- TREASURY -->
-    <div class="slabel">GUILD TREASURY <span id="g-treasury-timer" style="font-size:9px;color:var(--text3);font-family:'Space Mono',monospace;font-weight:400;float:right;padding-top:1px;"></span></div>
-    <div class="treasury-card">
-      <div class="tc-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>WEEKLY TREASURY</span>
-        <span id="g-treasury-status-badge" style="font-size:8px;padding:2px 7px;border-radius:6px;background:rgba(0,230,118,.1);color:var(--emerald);font-family:'Space Mono',monospace;font-weight:700;">ACCUMULATING</span>
-      </div>
-      <div class="tc-row">
-        <div class="tc-item"><div class="tc-val" id="g-tc-coins">4,200</div><div class="tc-lbl">COINS ⬡</div></div>
-        <div class="tc-item"><div class="tc-val" id="g-tc-chests">3</div><div class="tc-lbl">CHESTS 📦</div></div>
-        <div class="tc-item"><div class="tc-val" id="g-tc-forecasts">7</div><div class="tc-lbl">FORECASTS 📄</div></div>
-      </div>
-      <button class="tc-open-btn" id="g-treasury-btn" onclick="guildOpenTreasury()">🔮 VIEW & OPEN TREASURY</button>
-    </div>
-
-    <!-- CONTRIBUTE -->
-    <div style="margin:0 12px 10px;background:var(--card);border:1px solid rgba(0,230,118,.15);border-radius:16px;padding:15px;">
-      <div style="font-size:10px;color:var(--emerald);font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:10px;">CONTRIBUTE TO TREASURY <span style="color:#555;font-weight:400">· builds guild rank</span></div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="guildContributeCoins()" style="flex:1;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:11px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--emerald);cursor:pointer;">+100⬡<br><span style="font-size:9px;font-weight:400;color:#555">COINS</span></button>
-        <button onclick="openGuildContribModal('chest')" style="flex:1;background:rgba(139,105,20,.1);border:1px solid rgba(139,105,20,.25);border-radius:11px;padding:11px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#c8961e;cursor:pointer;">📦 CHEST<br><span style="font-size:9px;font-weight:400;color:#555">FROM VAULT</span></button>
-        <button onclick="openGuildContribModal('forecast')" style="flex:1;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:11px;padding:11px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--cyan);cursor:pointer;">📄 FORECAST<br><span style="font-size:9px;font-weight:400;color:#555">SHARE ONE</span></button>
-      </div>
-    </div>
-
-    <!-- MEMBERS -->
-    <div class="slabel">MEMBERS <span id="g-members-badge" style="font-size:9px;color:#555;font-weight:400;font-family:'Space Mono',monospace;">8/10</span></div>
-    <div id="g-members-list">
-      <!-- populated by opRenderGuild() -->
-    </div>
-
-    <!-- GUILD CHAT -->
-    <div class="slabel">GUILD CHAMBER <span style="font-size:9px;color:var(--emerald);font-family:'Space Mono',monospace;font-weight:400;" id="g-online-count">8 ONLINE</span></div>
-    <div class="guild-chat">
-      <div class="chat-msgs" id="chat-msgs">
-        <div class="cm system"><div class="cm-body"><div class="cm-text">🔮 oracle_x opened the weekly treasury! 3 Bronze Chests distributed.</div><div class="cm-time">2h ago</div></div></div>
-        <div class="cm">
-          <div class="cm-avatar" style="background:linear-gradient(135deg,#1a0e00,#2a1800)">🧿</div>
-          <div class="cm-body"><div class="cm-name" style="color:var(--orange)">oracle_x 👑</div><div class="cm-text">BTC looking strong — my 4H long is up +8%. Treasury opened, check rewards 🔥</div><div class="cm-time">1h ago</div></div>
-        </div>
-        <div class="cm">
-          <div class="cm-avatar" style="background:#0a0a12">🌙</div>
-          <div class="cm-body"><div class="cm-name" style="color:var(--silver)">silver_prophet</div><div class="cm-text">Gold 1D setup looks clean. Contributing 2 forecasts to next treasury 💎</div><div class="cm-time">45m ago</div></div>
-        </div>
-        <div class="cm system"><div class="cm-body"><div class="cm-text">📄 silver_prophet contributed 2 GOLD 1D forecasts to treasury.</div><div class="cm-time">44m ago</div></div></div>
-      </div>
-      <div class="chat-input-row">
-        <input class="chat-input" id="chat-input" placeholder="Message guild..." onkeydown="if(event.key==='Enter')sendChat()">
-        <button class="chat-send" onclick="sendChat()">➤</button>
-      </div>
-    </div>
-
-    <!-- LEADERBOARD -->
-    <div class="slabel">GUILDS LEADERBOARD</div>
-    <div id="g-leaderboard-list" style="margin:0 12px 8px;display:flex;flex-direction:column;gap:7px;">
-      <!-- populated by JS -->
-    </div>
-    <div style="margin:0 12px 10px;background:var(--card);border:1px solid rgba(0,230,118,.15);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="guildOpenModal('guild-create-modal')">
-      <span style="font-size:24px">✚</span>
-      <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--emerald)">CREATE NEW GUILD</div><div style="font-size:9px;color:var(--text3);font-family:'Space Mono',monospace;">COST: 1,000⬡ · YOU BECOME GUILD MASTER</div></div>
-      <span style="font-size:18px;color:var(--emerald)">›</span>
-    </div>
-  </div>
-
-        </div>
       </div>
       <!-- TRADERS tab removed — unified into Oracle > TRADERS sub-tab -->
 
@@ -14608,79 +14506,18 @@ const GUILD_LEADERBOARD = [
 ];
 
 function opRenderGuild() {
-  // ── Stats ─────────────────────────────────────────
-  const t = OC_EXT.guildTreasury || {coins:4200, chests:{bronze:2,silver:1}, forecasts:7};
-  const totalChests = typeof t.chests === 'number' ? t.chests : Object.values(t.chests||{}).reduce((a,b)=>a+b,0);
-  const setTxt = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
-
-  setTxt('g-members', guildState.members);
-  setTxt('g-coins', guildState.coins.toLocaleString());
-  setTxt('g-rank', '#'+guildState.rank);
-  setTxt('g-avgscore', guildState.avgScore+'%');
-  setTxt('g-members-badge', guildState.members+'/'+guildState.maxMembers);
-  setTxt('g-tc-coins', t.coins.toLocaleString());
-  setTxt('g-tc-chests', totalChests);
-  setTxt('g-tc-forecasts', t.forecasts);
-
-  // ── Treasury countdown ────────────────────────────
-  const now = new Date();
-  const sunday = new Date(now);
-  sunday.setDate(now.getDate() + (7 - now.getDay()) % 7 || 7);
-  sunday.setHours(0,0,0,0);
-  const diff = sunday - now;
-  const dd = Math.floor(diff/86400000);
-  const hh = Math.floor((diff%86400000)/3600000);
-  const mm = Math.floor((diff%3600000)/60000);
-  const timerEl = document.getElementById('g-treasury-timer');
-  if (timerEl) timerEl.textContent = dd>0 ? `Opens in ${dd}d ${hh}h` : `Opens in ${hh}h ${mm}m`;
-
-  // ── Members list ──────────────────────────────────
-  const membersList = document.getElementById('g-members-list');
-  if (membersList) {
-    membersList.innerHTML = GUILD_MEMBERS.map(m => {
-      const userScore = m.isYou ? calcGuildScore() : m.score;
-      const userRank  = m.isYou ? getMyRankLabel() : m.rank;
-      const userStreak= m.isYou ? (OC.streak||0) : m.streak;
-      const scoreColor = userScore>=80?'var(--green)': userScore>=60?'var(--cyan)': userScore>=40?'var(--orange)':'var(--text2)';
-      return `<div class="guild-member" style="cursor:pointer" onclick="guildOpenMemberModal('${m.handle}','${m.icon}','${m.avatarBg}','${m.isYou?userRank:m.rank}',${userScore},'${m.isYou?70:m.btc}','${m.isYou?65:m.gold}','${m.isYou?60:m.eth}','${m.isYou?userRank:m.rank}','${m.isYou?userStreak+'🔥 streak':m.streak+'🔥 streak'}')">
-        <div class="gm-avatar" style="background:${m.avatarBg};${m.isYou?'border:2px solid rgba(0,229,255,.3);':''}">${m.icon}</div>
-        <div class="gm-info">
-          <div class="gm-name">${m.isYou?'YOU ★':m.handle}${m.isLeader?' <span class="gm-crown">👑</span>':''}</div>
-          <div class="gm-rank" style="color:${m.isYou?'var(--cyan)':m.rankColor}">${m.isYou?userRank+' · '+userStreak+'🔥':m.rank+' · '+m.streak+'🔥'}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="gm-score" style="color:${scoreColor}">${userScore}</div>
-          <div class="gm-score-lbl">SCORE</div>
-        </div>
-      </div>`;
-    }).join('');
+  // Copy rich guild-section content into oracle panel's op-guild
+  const src = document.getElementById('guild-section');
+  const dst = document.getElementById('op-guild');
+  if (src && dst) {
+    // Only copy if not already populated (avoid re-copying on each tab switch)
+    if (!dst.dataset.populated) {
+      dst.innerHTML = '<div class="scrollable-op">' + src.innerHTML + '</div>';
+      dst.dataset.populated = '1';
+    }
   }
-
-  // ── Leaderboard ───────────────────────────────────
-  const lbList = document.getElementById('g-leaderboard-list');
-  if (lbList) {
-    lbList.innerHTML = GUILD_LEADERBOARD.map(g => {
-      const rankColor = g.rank===1?'var(--gold)': g.rank===2?'var(--silver)': g.rank===3?'var(--bronze)':'var(--text2)';
-      const isMine = g.isMine;
-      const btnHtml = isMine
-        ? `<div style="font-size:9px;color:var(--cyan);font-family:'Space Mono',monospace;font-weight:700;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);border-radius:7px;padding:4px 10px;">MY GUILD</div>`
-        : g.status==='full'
-          ? `<div style="font-size:9px;color:#555;font-family:'Space Mono',monospace;background:#1a1a1a;border:1px solid #222;border-radius:7px;padding:4px 10px;">FULL</div>`
-          : `<div onclick="guildJoin('${g.name}')" style="font-size:9px;color:var(--emerald);font-family:'Space Mono',monospace;font-weight:700;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:7px;padding:4px 10px;cursor:pointer;">JOIN</div>`;
-      return `<div style="background:var(--card);border:1px solid ${isMine?'rgba(0,229,255,.2)':'var(--border)'};border-radius:13px;padding:13px;display:flex;align-items:center;gap:11px;">
-        <div style="font-size:11px;font-weight:800;color:${rankColor};font-family:'Space Mono',monospace;width:22px;text-align:center;">#${g.rank}</div>
-        <div style="font-size:22px;">${g.emblem}</div>
-        <div style="flex:1">
-          <div style="font-size:12px;font-weight:700;color:${isMine?'var(--cyan)':'#fff'};">${g.name}</div>
-          <div style="font-size:9px;color:var(--text3);font-family:'Space Mono',monospace;">${g.members} MEMBERS · SCORE: ${g.score}</div>
-        </div>
-        ${btnHtml}
-      </div>`;
-    }).join('');
-  }
-
-  // ── Chat scroll ───────────────────────────────────
-  const msgs = document.getElementById('chat-msgs');
+  // Scroll chat to bottom
+  const msgs = document.getElementById('guild-gchat-msgs');
   if (msgs) msgs.scrollTop = msgs.scrollHeight;
 }
 
